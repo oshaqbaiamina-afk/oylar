@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oylar — Онлайн Сауалнама Платформасы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --indigo:#4F46E5;--indigo-d:#3730A3;--indigo-l:#EEF2FF;--indigo-xl:#E0E7FF;
+  --amber:#F59E0B;--amber-l:#FFFBEB;--amber-d:#92400E;
+  --rose:#F43F5E;--rose-l:#FFF1F2;--rose-d:#9F1239;
+  --sky:#0EA5E9;--sky-l:#F0F9FF;--sky-d:#0369A1;
+  --green:#10B981;--green-l:#ECFDF5;
+  --slate:#0F172A;--slate-700:#334155;--slate-600:#475569;--slate-400:#94A3B8;--slate-300:#CBD5E1;--slate-200:#E2E8F0;--slate-100:#F1F5F9;--slate-50:#F8FAFC;
+  --white:#fff;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --shadow:0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+  --radius:12px;--radius-lg:20px;--radius-xl:28px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--white);color:var(--slate);line-height:1.6}
+a{text-decoration:none;color:inherit}
+
+/* ─── BUTTONS ───────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .18s;white-space:nowrap}
+.btn-sm{padding:7px 16px;font-size:13px;border-radius:8px}
+.btn-lg{padding:14px 30px;font-size:15px;border-radius:12px}
+.btn-xl{padding:16px 36px;font-size:16px;border-radius:14px;font-weight:700}
+
+.btn-primary{background:var(--indigo);color:white;box-shadow:0 2px 8px rgba(79,70,229,.35)}
+.btn-primary:hover{background:var(--indigo-d);box-shadow:0 4px 16px rgba(79,70,229,.4);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--slate-600);border:1.5px solid var(--slate-300)}
+.btn-ghost:hover{background:var(--slate-100);border-color:var(--slate-400)}
+.btn-white{background:white;color:var(--indigo);box-shadow:var(--shadow)}
+.btn-white:hover{background:var(--indigo-l);transform:translateY(-1px)}
+.btn-outline-white{background:transparent;color:white;border:1.5px solid rgba(255,255,255,.5)}
+.btn-outline-white:hover{background:rgba(255,255,255,.12);border-color:white}
+.btn-amber{background:var(--amber);color:white;box-shadow:0 2px 8px rgba(245,158,11,.35)}
+.btn-amber:hover{background:#D97706;transform:translateY(-1px)}
+.btn-green{background:var(--green);color:white}
+.btn-green:hover{background:#059669}
+.btn-rose{background:var(--rose);color:white}
+.btn-rose:hover{background:var(--rose-d)}
+.btn-indigo-soft{background:var(--indigo-l);color:var(--indigo);border:1.5px solid var(--indigo-xl)}
+.btn-indigo-soft:hover{background:var(--indigo-xl)}
+
+/* ─── NAVBAR ────────────────────────────────── */
+.nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:68px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--slate-200);box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:38px;height:38px;background:var(--indigo);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(79,70,229,.3)}
+.brand-mark svg{width:20px;height:20px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round}
+.brand-name{font-size:20px;font-weight:800;color:var(--slate);letter-spacing:-.5px}
+.brand-name em{color:var(--indigo);font-style:normal}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-link{padding:7px 14px;border-radius:8px;font-size:14px;font-weight:500;color:var(--slate-600);transition:all .15s;cursor:pointer}
+.nav-link:hover{background:var(--slate-100);color:var(--slate)}
+.nav-right{display:flex;gap:8px;align-items:center}
+
+/* ─── HERO ──────────────────────────────────── */
+.hero{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 68px);background:var(--white);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-200px;right:-100px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(79,70,229,.07) 0%,transparent 70%);pointer-events:none}
+.hero-left{padding:5rem 3rem 4rem 3rem;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1}
+.hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.8rem}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.2px}
+.badge-indigo{background:var(--indigo-l);color:var(--indigo-d)}
+.badge-amber{background:var(--amber-l);color:var(--amber-d)}
+.badge-green{background:var(--green-l);color:#065F46}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.hero h1{font-size:48px;font-weight:800;line-height:1.12;letter-spacing:-1.5px;color:var(--slate);margin-bottom:1.2rem}
+.hero h1 .hl{color:var(--indigo)}
+.hero h1 .ul{border-bottom:3px solid var(--amber);padding-bottom:1px}
+.hero-sub{font-size:17px;color:var(--slate-600);line-height:1.7;max-width:420px;margin-bottom:2.2rem}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1.8rem}
+.hero-quick{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2rem}
+.quick-lbl{font-size:12px;font-weight:600;color:var(--slate-400);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;width:100%;margin-bottom:2px}
+.hero-trust{display:flex;align-items:center;gap:12px;padding-top:1.5rem;border-top:1px solid var(--slate-200)}
+.trust-faces{display:flex}
+.face{width:32px;height:32px;border-radius:50%;border:2.5px solid white;margin-left:-8px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;color:white}
+.face:first-child{margin-left:0}
+.trust-text{font-size:13px;color:var(--slate-600)}
+.trust-text strong{color:var(--slate);font-weight:700}
+
+/* ─── HERO RIGHT ─────────────────────────────── */
+.hero-right{background:linear-gradient(135deg,var(--indigo-l) 0%,#E0E7FF 100%);display:flex;align-items:center;justify-content:center;padding:2.5rem;position:relative;overflow:hidden}
+.hero-right::before{content:'';position:absolute;bottom:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(79,70,229,.08)}
+.hero-visual{width:100%;max-width:400px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1}
+.vis-card{background:white;border-radius:16px;padding:18px 20px;border:1px solid var(--slate-200);box-shadow:var(--shadow)}
+.vis-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.vis-card-title{font-size:13px;font-weight:700;color:var(--slate)}
+.vis-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600}
+.vis-status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.vis-progress-list{display:flex;flex-direction:column;gap:8px}
+.vis-p-row{display:flex;align-items:center;gap:10px;font-size:12px}
+.vis-p-label{width:60px;color:var(--slate-600);font-weight:500;flex-shrink:0}
+.vis-p-track{flex:1;height:6px;background:var(--slate-200);border-radius:3px;overflow:hidden}
+.vis-p-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.vis-p-pct{width:32px;text-align:right;color:var(--slate);font-weight:600}
+.vis-stat-row{display:flex;gap:10px}
+.vis-stat{flex:1;background:var(--slate-50);border-radius:10px;padding:12px;text-align:center}
+.vis-stat-n{font-size:20px;font-weight:800;color:var(--indigo)}
+.vis-stat-l{font-size:11px;color:var(--slate-600);font-weight:500}
+.vis-mini-survey{display:flex;flex-direction:column;gap:6px}
+.vis-q{font-size:13px;font-weight:600;color:var(--slate);margin-bottom:8px}
+.vis-opt{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--slate-200);border-radius:8px;font-size:12px;color:var(--slate-600);cursor:pointer;transition:all .15s}
+.vis-opt.active{border-color:var(--indigo);background:var(--indigo-l);color:var(--indigo);font-weight:600}
+.vis-opt-dot{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.vis-opt.active .vis-opt-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--indigo)}
+
+/* ─── QUICK ACTIONS ──────────────────────────── */
+.quick-actions{background:var(--slate);padding:1.2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.qa-left{font-size:14px;color:rgba(255,255,255,.7);font-weight:500}
+.qa-left strong{color:white}
+.qa-btns{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ─── STATS ──────────────────────────────────── */
+.stats{background:var(--indigo);padding:2.5rem 2.5rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.stat{text-align:center;padding:1rem}
+.stat-n{font-size:32px;font-weight:800;color:white;letter-spacing:-1px}
+.stat-n span{font-size:18px}
+.stat-l{font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;font-weight:500}
+.stat-icon{font-size:24px;margin-bottom:8px}
+
+/* ─── SECTION COMMONS ────────────────────────── */
+.sec-label{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--indigo);text-transform:uppercase;margin-bottom:.5rem}
+.sec-title{font-size:32px;font-weight:800;color:var(--slate);letter-spacing:-.8px;margin-bottom:.6rem;line-height:1.25}
+.sec-sub{font-size:16px;color:var(--slate-600);margin-bottom:2.5rem;max-width:500px;line-height:1.7}
+.sec-header{margin-bottom:3rem}
+.sec-header.center{text-align:center}
+.sec-header.center .sec-sub{margin-left:auto;margin-right:auto}
+
+/* ─── HOW IT WORKS ───────────────────────────── */
+.how{padding:5.5rem 2.5rem;background:var(--white)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+.step-card{padding:2rem;border-radius:var(--radius-lg);border:1.5px solid var(--slate-200);background:var(--white);transition:all .22s;cursor:default;position:relative;overflow:hidden}
+.step-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(79,70,229,.03));pointer-events:none}
+.step-card:hover{border-color:var(--indigo);transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.step-num{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;margin-bottom:1.2rem}
+.num-1{background:var(--indigo-l);color:var(--indigo)}
+.num-2{background:var(--amber-l);color:var(--amber-d)}
+.num-3{background:var(--rose-l);color:var(--rose-d)}
+.step-title{font-size:17px;font-weight:700;color:var(--slate);margin-bottom:.5rem}
+.step-desc{font-size:14px;color:var(--slate-600);line-height:1.7;margin-bottom:1.2rem}
+.step-btn-area{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ─── FEATURES ───────────────────────────────── */
+.features{padding:5.5rem 2.5rem;background:var(--slate-50)}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.feat-card{background:var(--white);border-radius:var(--radius-lg);padding:2rem;border:1.5px solid var(--slate-200);transition:all .22s;display:flex;flex-direction:column}
+.feat-card:hover{border-color:var(--indigo);box-shadow:var(--shadow-lg);transform:translateY(-3px)}
+.feat-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem;font-size:22px}
+.feat-icon-indigo{background:var(--indigo-l)}
+.feat-icon-amber{background:var(--amber-l)}
+.feat-icon-rose{background:var(--rose-l)}
+.feat-icon-sky{background:var(--sky-l)}
+.feat-icon-green{background:var(--green-l)}
+.feat-icon-slate{background:var(--slate-100)}
+.feat-title{font-size:16px;font-weight:700;color:var(--slate);margin-bottom:.5rem}
+.feat-desc{font-size:14px;color:var(--slate-600);line-height:1.65;margin-bottom:1.2rem;flex:1}
+.feat-tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--slate-100);color:var(--slate-600)}
+
+/* ─── DEMO SURVEY ────────────────────────────── */
+.demo-sec{padding:5.5rem 2.5rem;background:var(--white)}
+.demo-wrap{max-width:640px;margin:0 auto}
+.survey-card{background:var(--white);border-radius:var(--radius-xl);border:1.5px solid var(--slate-200);overflow:hidden;box-shadow:var(--shadow-lg)}
+.survey-top{background:var(--indigo);padding:1.8rem 2.2rem;position:relative}
+.survey-top h3{color:white;font-size:18px;font-weight:700;margin-bottom:4px}
+.survey-top p{color:rgba(255,255,255,.7);font-size:13px}
+.prog-track{height:5px;background:rgba(255,255,255,.2);border-radius:3px;margin-top:1.2rem}
+.prog-fill{height:100%;border-radius:3px;background:var(--amber);transition:width .4s}
+.survey-body{padding:2.2rem}
+.q-tag{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--indigo);text-transform:uppercase;margin-bottom:.7rem}
+.q-text{font-size:18px;font-weight:700;color:var(--slate);margin-bottom:1.6rem;line-height:1.45}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;padding:14px 18px;border:1.5px solid var(--slate-200);border-radius:12px;cursor:pointer;transition:all .15s;font-family:inherit;background:white;text-align:left;width:100%}
+.opt:hover{border-color:var(--indigo);background:var(--indigo-l)}
+.opt.sel{border-color:var(--indigo);background:var(--indigo-l)}
+.opt-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--slate-300);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.opt.sel .opt-radio{border-color:var(--indigo);background:var(--indigo)}
+.opt.sel .opt-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:white}
+.opt-txt{font-size:14px;color:var(--slate);font-weight:500}
+.survey-foot{padding:1.5rem 2.2rem;border-top:1px solid var(--slate-100);display:flex;justify-content:space-between;align-items:center}
+.foot-step{font-size:13px;color:var(--slate-600)}
+.foot-btns{display:flex;gap:10px}
+
+/* ─── RESULTS ────────────────────────────────── */
+.results-sec{background:var(--slate-50);padding:5.5rem 2.5rem}
+.results-inner{max-width:900px;margin:0 auto}
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.res-card{background:var(--white);border-radius:var(--radius-lg);padding:2rem;border:1.5px solid var(--slate-200)}
+.res-card h4{font-size:15px;font-weight:700;color:var(--slate);margin-bottom:1.2rem}
+.bar-r{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-lbl{font-size:13px;color:var(--slate-600);width:80px;flex-shrink:0;font-weight:500}
+.bar-trk{flex:1;height:10px;background:var(--slate-100);border-radius:5px;overflow:hidden}
+.bar-f{height:100%;border-radius:5px;transition:width 1s ease}
+.bar-pct{font-size:13px;font-weight:700;color:var(--slate);width:36px;text-align:right}
+.metrics{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem}
+.mrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--slate-100)}
+.mrow:last-child{border-bottom:none}
+.mlbl{font-size:13px;color:var(--slate-600)}
+.mval{font-size:14px;font-weight:700;color:var(--slate)}
+.res-btns{display:flex;gap:8px;margin-top:1.2rem}
+
+/* ─── USE CASES ──────────────────────────────── */
+.usecases{padding:5.5rem 2.5rem;background:var(--white)}
+.uc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
+.uc-card{background:var(--slate-50);border-radius:var(--radius-lg);padding:1.8rem;border:1.5px solid var(--slate-200);text-align:center;transition:all .2s;cursor:pointer}
+.uc-card:hover{background:var(--indigo-l);border-color:var(--indigo);transform:translateY(-3px)}
+.uc-icon{font-size:32px;margin-bottom:1rem}
+.uc-title{font-size:15px;font-weight:700;color:var(--slate);margin-bottom:.4rem}
+.uc-desc{font-size:13px;color:var(--slate-600);line-height:1.55;margin-bottom:1rem}
+
+/* ─── PLANS ──────────────────────────────────── */
+.plans{padding:5.5rem 2.5rem;background:var(--slate-50)}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:900px;margin:0 auto}
+.plan-card{background:var(--white);border-radius:var(--radius-xl);padding:2.2rem;border:1.5px solid var(--slate-200);transition:all .22s;position:relative}
+.plan-card.popular{border-color:var(--indigo);box-shadow:0 0 0 4px var(--indigo-l)}
+.plan-popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--indigo);color:white;font-size:11px;font-weight:700;padding:4px 14px;border-radius:999px;letter-spacing:.3px}
+.plan-name{font-size:14px;font-weight:700;color:var(--slate-600);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px}
+.plan-price{font-size:36px;font-weight:800;color:var(--slate);letter-spacing:-1.5px;margin-bottom:.3rem}
+.plan-price span{font-size:16px;font-weight:500;color:var(--slate-600)}
+.plan-desc{font-size:14px;color:var(--slate-600);margin-bottom:1.5rem;line-height:1.6}
+.plan-features{display:flex;flex-direction:column;gap:8px;margin-bottom:2rem}
+.pf{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--slate-700)}
+.pf-check{width:18px;height:18px;border-radius:50%;background:var(--green-l);color:var(--green);font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800}
+
+/* ─── CTA ────────────────────────────────────── */
+.cta{background:linear-gradient(135deg,var(--indigo) 0%,var(--indigo-d) 100%);padding:6rem 2.5rem;text-align:center;position:relative;overflow:hidden}
+.cta::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(circle,rgba(255,255,255,.06) 0%,transparent 70%)}
+.cta h2{font-size:42px;font-weight:800;color:white;letter-spacing:-1.5px;margin-bottom:.8rem;position:relative}
+.cta p{font-size:17px;color:rgba(255,255,255,.75);margin-bottom:2.5rem;max-width:450px;margin-left:auto;margin-right:auto;line-height:1.65}
+.cta-btns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;position:relative}
+
+/* ─── FOOTER ─────────────────────────────────── */
+.footer{background:var(--slate);padding:4rem 2.5rem 2rem;color:rgba(255,255,255,.65)}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.footer-brand-name{font-size:22px;font-weight:800;color:white;margin-bottom:8px}
+.footer-brand-name em{color:var(--amber);font-style:normal}
+.footer-tagline{font-size:14px;line-height:1.65;margin-bottom:1.5rem}
+.footer-social{display:flex;gap:8px}
+.social-btn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .15s;border:none}
+.social-btn:hover{background:var(--indigo)}
+.footer-col-title{font-size:13px;font-weight:700;color:white;letter-spacing:.3px;margin-bottom:1.2rem;text-transform:uppercase}
+.footer-links{display:flex;flex-direction:column;gap:8px}
+.footer-link{font-size:14px;color:rgba(255,255,255,.55);cursor:pointer;transition:color .15s}
+.footer-link:hover{color:white}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:2rem;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap;gap:1rem}
+.footer-copy{font-size:13px}
+.footer-badges{display:flex;gap:8px}
+.footer-badge{padding:4px 12px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.5)}
+
+/* ─── TOAST ──────────────────────────────────── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--slate);color:white;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:var(--shadow-lg)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ─── RESPONSIVE ─────────────────────────────── */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .hero-right{display:none}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr 1fr}
+  .uc-grid{grid-template-columns:1fr 1fr}
+  .plans-grid{grid-template-columns:1fr}
+  .results-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .hero h1{font-size:36px}
+}
+@media(max-width:600px){
+  .hero-left{padding:3rem 1.5rem}
+  .nav{padding:0 1.5rem}
+  .features-grid,.uc-grid{grid-template-columns:1fr}
+  .hero h1{font-size:30px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .cta h2{font-size:30px}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── NAVBAR ─── -->
+<nav class="nav">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <span class="brand-name"><em>Oylar</em></span>
+  </div>
+  <div class="nav-links">
+    <a href="#how" class="nav-link">Қалай жұмыс істейді</a>
+    <a href="#features" class="nav-link">Мүмкіндіктер</a>
+    <a href="#demo" class="nav-link">Демо</a>
+    <a href="#plans" class="nav-link">Тарифтер</a>
+  </div>
+  <div class="nav-right" id="nav-right">
+    <a href="/login.html" class="btn btn-ghost btn-sm">Кіру</a>
+    <a href="/register.html" class="btn btn-primary btn-sm">Тегін тіркелу</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-badges">
+      <span class="badge badge-indigo"><span class="badge-dot"></span>Жаңа v2.0 шықты</span>
+      <span class="badge badge-amber"><span class="badge-dot"></span>Тегін тарифі бар</span>
+      <span class="badge badge-green"><span class="badge-dot"></span><span id="idx-users1">1,200</span>+ белсенді пайдаланушы</span>
+    </div>
+    <h1>Сауалнама жасаңыз,<br><span class="hl ul">пікір жинаңыз</span>,<br>нәтиже алыңыз</h1>
+    <p class="hero-sub">Oylar — қазақстандық бизнес пен студенттерге арналған онлайн сауалнама платформасы. 2 минутта жасаңыз, бірден жіберіңіз.</p>
+    <div class="hero-actions">
+      <a href="/register.html" class="btn btn-primary btn-lg">🚀 Тегін бастау</a>
+      <a href="#demo" class="btn btn-ghost btn-lg">▶ Демо көру</a>
+    </div>
+    <div class="hero-quick">
+      <span class="quick-lbl">Жылдам әрекеттер:</span>
+      <button class="btn btn-indigo-soft btn-sm" onclick="showToast('Шаблон ашылды!')">📋 Шаблондар</button>
+      <button class="btn btn-indigo-soft btn-sm" onclick="showToast('API кілті жіберілді')">🔗 API қосылу</button>
+      <button class="btn btn-indigo-soft btn-sm" onclick="showToast('Видеоны ашу...')">📹 Оқулық</button>
+      <button class="btn btn-indigo-soft btn-sm" onclick="showToast('WhatsApp чаты ашылды')">💬 Қолдау</button>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-faces">
+        <div class="face" style="background:#4F46E5">АС</div>
+        <div class="face" style="background:#F59E0B">МБ</div>
+        <div class="face" style="background:#F43F5E">ДН</div>
+        <div class="face" style="background:#0EA5E9">КА</div>
+      </div>
+      <div class="trust-text">Осы аптада <strong id="idx-users2">1,200</strong>+ адам тіркелді</div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-visual">
+      <!-- Live stats card -->
+      <div class="vis-card">
+        <div class="vis-card-header">
+          <span style="font-size:14px;font-weight:700;color:var(--slate)">📊 Нақты уақыт статистикасы</span>
+          <span class="vis-status" style="color:var(--green)"><span class="vis-status-dot"></span>Тікелей</span>
+        </div>
+        <div class="vis-progress-list">
+          <div class="vis-p-row"><span class="vis-p-label">Өте жақсы</span><div class="vis-p-track"><div class="vis-p-fill" style="width:72%;background:var(--indigo)"></div></div><span class="vis-p-pct">72%</span></div>
+          <div class="vis-p-row"><span class="vis-p-label">Жақсы</span><div class="vis-p-track"><div class="vis-p-fill" style="width:18%;background:var(--sky)"></div></div><span class="vis-p-pct">18%</span></div>
+          <div class="vis-p-row"><span class="vis-p-label">Орташа</span><div class="vis-p-track"><div class="vis-p-fill" style="width:7%;background:var(--amber)"></div></div><span class="vis-p-pct">7%</span></div>
+          <div class="vis-p-row"><span class="vis-p-label">Нашар</span><div class="vis-p-track"><div class="vis-p-fill" style="width:3%;background:var(--rose)"></div></div><span class="vis-p-pct">3%</span></div>
+        </div>
+      </div>
+      <!-- Stats row -->
+      <div class="vis-stat-row">
+        <div class="vis-stat"><div class="vis-stat-n" id="idx-responses">1 248</div><div class="vis-stat-l">Жауаптар</div></div>
+        <div class="vis-stat"><div class="vis-stat-n">89%</div><div class="vis-stat-l">Аяқтаған</div></div>
+        <div class="vis-stat"><div class="vis-stat-n">+67</div><div class="vis-stat-l">NPS ұпай</div></div>
+      </div>
+      <!-- Mini survey preview -->
+      <div class="vis-card">
+        <div class="vis-mini-survey">
+          <div class="vis-q">Платформаны бағалаңыз:</div>
+          <div class="vis-opt active" onclick="selectVis(this)"><div class="vis-opt-dot"></div>⭐⭐⭐⭐⭐ Керемет!</div>
+          <div class="vis-opt" onclick="selectVis(this)"><div class="vis-opt-dot"></div>⭐⭐⭐⭐ Жақсы</div>
+          <div class="vis-opt" onclick="selectVis(this)"><div class="vis-opt-dot"></div>⭐⭐⭐ Орташа</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── QUICK ACTIONS BAR ─── -->
+<div class="quick-actions">
+  <div class="qa-left">Бүгін <strong>247 жаңа сауалнама</strong> жасалды</div>
+  <div class="qa-btns">
+    <a href="/register.html" class="btn btn-white btn-sm">✨ Сауалнама жасау</a>
+    <button class="btn btn-outline-white btn-sm" onclick="showToast('Шаблондар тізімі...')">📋 Дайын шаблондар</button>
+    <button class="btn btn-outline-white btn-sm" onclick="showToast('Кіру бетіне өту...')">🔗 Жіберілген сілтеме</button>
+    <button class="btn btn-amber btn-sm" onclick="showToast('Аналитика беті...')">📈 Аналитика</button>
+  </div>
+</div>
+
+<!-- ─── STATS STRIP ─── -->
+<section class="stats">
+  <div class="stat"><div class="stat-icon">👥</div><div class="stat-n"><span id="s-users">1,200</span>+</div><div class="stat-l">Тіркелген пайдаланушы</div></div>
+  <div class="stat"><div class="stat-icon">📊</div><div class="stat-n">8,400+</div><div class="stat-l">Жасалған сауалнама</div></div>
+  <div class="stat"><div class="stat-icon">✅</div><div class="stat-n">95<span>%</span></div><div class="stat-l">Қанағаттанған пайдаланушы</div></div>
+  <div class="stat"><div class="stat-icon">⚡</div><div class="stat-n">2 мин</div><div class="stat-l">Сауалнама жасау уақыты</div></div>
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section class="how" id="how">
+  <div class="sec-header center">
+    <div class="sec-label">Жұмыс принципі</div>
+    <div class="sec-title">3 қадамда нәтиже алыңыз</div>
+    <div class="sec-sub">Тіркелуден бастап нәтиже алуға дейін барлығы бірнеше минутта</div>
+  </div>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num num-1">1</div>
+      <div class="step-title">Тіркеліп, сауалнама жасаңыз</div>
+      <div class="step-desc">Дайын шаблондардан таңдаңыз немесе өзіңіз нөлден жасаңыз. Сұрақ түрлері: бір таңдау, бірнеше таңдау, мәтін, рейтинг.</div>
+      <div class="step-btn-area">
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='/register.html'">Тіркелу →</button>
+        <button class="btn btn-indigo-soft btn-sm" onclick="showToast('Шаблондар ашылды')">Шаблондар</button>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num num-2">2</div>
+      <div class="step-title">Сілтемені жіберіңіз</div>
+      <div class="step-desc">Бір басқышпен сілтеме аласыз. WhatsApp, email, Telegram арқылы немесе QR-код ретінде жіберіңіз.</div>
+      <div class="step-btn-area">
+        <button class="btn btn-amber btn-sm" onclick="showToast('Сілтеме көшірілді!')">🔗 Сілтеме алу</button>
+        <button class="btn btn-indigo-soft btn-sm" onclick="showToast('QR-код жасалды')">QR-код</button>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num num-3">3</div>
+      <div class="step-title">Нәтижелерді талдаңыз</div>
+      <div class="step-desc">Жауаптар нақты уақытта жиналады. Диаграммалар, кестелер, Excel экспорты — бәрі дайын.</div>
+      <div class="step-btn-area">
+        <button class="btn btn-rose btn-sm" onclick="showToast('Аналитика беті...')">📈 Нәтиже</button>
+        <button class="btn btn-indigo-soft btn-sm" onclick="showToast('Excel жүктелуде...')">⬇ Excel</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURES ─── -->
+<section class="features" id="features">
+  <div class="sec-header center">
+    <div class="sec-label">Мүмкіндіктер</div>
+    <div class="sec-title">Барлығы бір платформада</div>
+    <div class="sec-sub">Кәсіби сауалнама, аналитика және пікір жинауға қажетті барлық құралдар</div>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon feat-icon-indigo">📝</div>
+      <div class="feat-title">Сауалнама редакторы</div>
+      <div class="feat-desc">Drag & drop интерфейсімен сұрақтар қосыңыз. 6 түрлі сұрақ форматы бар.</div>
+      <div class="feat-tags"><span class="tag">Drag & drop</span><span class="tag">6 формат</span></div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon feat-icon-amber">📊</div>
+      <div class="feat-title">Нақты уақыт аналитикасы</div>
+      <div class="feat-desc">Жауаптар түскен сайын диаграммалар жаңарады. NPS, CSAT есептеулері автоматты.</div>
+      <div class="feat-tags"><span class="tag">NPS</span><span class="tag">CSAT</span><span class="tag">Live</span></div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon feat-icon-rose">🔗</div>
+      <div class="feat-title">Жіберу мүмкіндіктері</div>
+      <div class="feat-desc">Email, WhatsApp, Telegram арқылы жіберіңіз немесе сайтыңызға iframe ретінде қосыңыз.</div>
+      <div class="feat-tags"><span class="tag">Email</span><span class="tag">QR-код</span><span class="tag">Iframe</span></div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon feat-icon-sky">🛡️</div>
+      <div class="feat-title">Аутентификация</div>
+      <div class="feat-desc">JWT токен, парольді шифрлау, рөлдер жүйесі (admin/user). Деректеріңіз қорғалған.</div>
+      <div class="feat-tags"><span class="tag">JWT</span><span class="tag">bcrypt</span><span class="tag">Рөлдер</span></div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon feat-icon-green">💬</div>
+      <div class="feat-title">Пікірлер жүйесі</div>
+      <div class="feat-desc">Қатысушылар сауалнама бойынша пікір қалдыра алады. Модерация қолдауы бар.</div>
+      <div class="feat-tags"><span class="tag">Пікірлер</span><span class="tag">Модерация</span></div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon feat-icon-slate">📤</div>
+      <div class="feat-title">Экспорт</div>
+      <div class="feat-desc">Нәтижелерді Excel, CSV немесе PDF форматында жүктеп алыңыз. API арқылы интеграция.</div>
+      <div class="feat-tags"><span class="tag">Excel</span><span class="tag">CSV</span><span class="tag">REST API</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DEMO SURVEY ─── -->
+<section class="demo-sec" id="demo">
+  <div class="sec-header center">
+    <div class="sec-label">Демо</div>
+    <div class="sec-title">Өзіңіз байқап көріңіз</div>
+    <div class="sec-sub">Нақты сауалнаманың қалай жұмыс істейтінін сезіп көріңіз</div>
+  </div>
+  <div class="demo-wrap">
+    <div class="survey-card">
+      <div class="survey-top">
+        <h3>Oylar платформасын бағалаңыз</h3>
+        <p>Бұл демо сауалнама — нақты деректер жіберілмейді</p>
+        <div class="prog-track"><div class="prog-fill" id="prog" style="width:33%"></div></div>
+      </div>
+      <div class="survey-body" id="survey-body">
+        <div class="q-tag" id="q-num">1-сұрақ / 3</div>
+        <div class="q-text" id="q-txt"></div>
+        <div class="opts" id="opts"></div>
+      </div>
+      <div class="survey-foot" id="survey-foot">
+        <span class="foot-step" id="step-lbl">1 / 3</span>
+        <div class="foot-btns">
+          <button class="btn btn-ghost btn-sm" id="prev-btn" onclick="prevQ()">← Алдыңғы</button>
+          <button class="btn btn-primary btn-sm" id="next-btn" onclick="nextQ()">Келесі →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── RESULTS ─── -->
+<section class="results-sec">
+  <div class="sec-header center">
+    <div class="sec-label">Аналитика</div>
+    <div class="sec-title">Нәтижелер панелі</div>
+    <div class="sec-sub">Жауаптарды нақты уақытта бақылаңыз</div>
+  </div>
+  <div class="results-inner">
+    <div class="results-grid">
+      <div class="res-card">
+        <h4>📊 Бағалар үлестірімі</h4>
+        <div class="bar-r"><span class="bar-lbl">Өте жақсы</span><div class="bar-trk"><div class="bar-f" style="width:72%;background:var(--indigo)"></div></div><span class="bar-pct">72%</span></div>
+        <div class="bar-r"><span class="bar-lbl">Жақсы</span><div class="bar-trk"><div class="bar-f" style="width:18%;background:var(--sky)"></div></div><span class="bar-pct">18%</span></div>
+        <div class="bar-r"><span class="bar-lbl">Орташа</span><div class="bar-trk"><div class="bar-f" style="width:7%;background:var(--amber)"></div></div><span class="bar-pct">7%</span></div>
+        <div class="bar-r"><span class="bar-lbl">Нашар</span><div class="bar-trk"><div class="bar-f" style="width:3%;background:var(--rose)"></div></div><span class="bar-pct">3%</span></div>
+        <div class="res-btns">
+          <button class="btn btn-primary btn-sm" onclick="showToast('Диаграмма жаңартылды')">📈 Диаграмма</button>
+          <button class="btn btn-indigo-soft btn-sm" onclick="showToast('Excel жүктелуде...')">⬇ Excel</button>
+        </div>
+      </div>
+      <div class="res-card">
+        <h4>📋 Статистика</h4>
+        <div class="metrics">
+          <div class="mrow"><span class="mlbl">Жауаптар саны</span><span class="mval">1 248</span></div>
+          <div class="mrow"><span class="mlbl">Аяқтау пайызы</span><span class="mval">89%</span></div>
+          <div class="mrow"><span class="mlbl">Орташа уақыт</span><span class="mval">2 мин 14 сек</span></div>
+          <div class="mrow"><span class="mlbl">Орташа баға</span><span class="mval">4.6 / 5</span></div>
+          <div class="mrow"><span class="mlbl">NPS ұпайы</span><span class="mval" style="color:var(--indigo)">+67</span></div>
+        </div>
+        <div class="res-btns">
+          <button class="btn btn-ghost btn-sm" onclick="showToast('Толық есеп...')">📄 Есеп</button>
+          <button class="btn btn-indigo-soft btn-sm" onclick="showToast('Бөлісу сілтемесі көшірілді!')">🔗 Бөлісу</button>
+          <button class="btn btn-green btn-sm" onclick="showToast('CSV жүктелуде...')">⬇ CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── USE CASES ─── -->
+<section class="usecases">
+  <div class="sec-header center">
+    <div class="sec-label">Қолдану салалары</div>
+    <div class="sec-title">Кім пайдалана алады?</div>
+  </div>
+  <div class="uc-grid">
+    <div class="uc-card" onclick="showToast('Бизнес шаблондары...')">
+      <div class="uc-icon">🏢</div>
+      <div class="uc-title">Бизнес</div>
+      <div class="uc-desc">Тұтынушы қанағатын өлшеу, NPS жинау</div>
+      <button class="btn btn-indigo-soft btn-sm">Шаблондар →</button>
+    </div>
+    <div class="uc-card" onclick="showToast('Оқу шаблондары...')">
+      <div class="uc-icon">🎓</div>
+      <div class="uc-title">Білім</div>
+      <div class="uc-desc">Сынақтар, тест, оқушы пікірін жинау</div>
+      <button class="btn btn-indigo-soft btn-sm">Шаблондар →</button>
+    </div>
+    <div class="uc-card" onclick="showToast('HR шаблондары...')">
+      <div class="uc-icon">👥</div>
+      <div class="uc-title">HR</div>
+      <div class="uc-desc">Қызметкер бағалауы, 360° feedback</div>
+      <button class="btn btn-indigo-soft btn-sm">Шаблондар →</button>
+    </div>
+    <div class="uc-card" onclick="showToast('Зерттеу шаблондары...')">
+      <div class="uc-icon">🔬</div>
+      <div class="uc-title">Зерттеу</div>
+      <div class="uc-desc">Маркетинг зерттеуі, аудитория талдауы</div>
+      <button class="btn btn-indigo-soft btn-sm">Шаблондар →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PLANS ─── -->
+<section class="plans" id="plans">
+  <div class="sec-header center">
+    <div class="sec-label">Тарифтер</div>
+    <div class="sec-title">Сіздің бюджетіңізге сай</div>
+    <div class="sec-sub">Барлық тарифте тіркелу тегін</div>
+  </div>
+  <div class="plans-grid">
+    <div class="plan-card">
+      <div class="plan-name">Тегін</div>
+      <div class="plan-price">₸0 <span>/ ай</span></div>
+      <div class="plan-desc">Жеке жобалар мен студенттерге арналған</div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-check">✓</span>5 сауалнама</div>
+        <div class="pf"><span class="pf-check">✓</span>100 жауап/ай</div>
+        <div class="pf"><span class="pf-check">✓</span>Негізгі аналитика</div>
+        <div class="pf"><span class="pf-check">✓</span>Сілтеме жіберу</div>
+      </div>
+      <a href="/register.html" class="btn btn-ghost" style="width:100%;justify-content:center">Тегін бастау</a>
+    </div>
+    <div class="plan-card popular">
+      <div class="plan-popular-badge">⭐ Ең танымал</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">₸4 990 <span>/ ай</span></div>
+      <div class="plan-desc">Бизнес пен командаларға арналған</div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-check">✓</span>Шексіз сауалнама</div>
+        <div class="pf"><span class="pf-check">✓</span>10 000 жауап/ай</div>
+        <div class="pf"><span class="pf-check">✓</span>Толық аналитика</div>
+        <div class="pf"><span class="pf-check">✓</span>Excel/CSV экспорт</div>
+        <div class="pf"><span class="pf-check">✓</span>Теңшелген дизайн</div>
+      </div>
+      <a href="/register.html" class="btn btn-primary" style="width:100%;justify-content:center">Pro-ға жазылу</a>
+    </div>
+    <div class="plan-card">
+      <div class="plan-name">Корпоративті</div>
+      <div class="plan-price">₸19 990 <span>/ ай</span></div>
+      <div class="plan-desc">Ірі компаниялар мен мекемелерге</div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-check">✓</span>Шексіз барлығы</div>
+        <div class="pf"><span class="pf-check">✓</span>API қол жетімділігі</div>
+        <div class="pf"><span class="pf-check">✓</span>Арнайы домен</div>
+        <div class="pf"><span class="pf-check">✓</span>24/7 қолдау</div>
+      </div>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="showToast('Байланыс жіберілді!')">Бізбен байланысу</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ─── -->
+<section class="cta">
+  <h2>Бүгін тегін бастаңыз</h2>
+  <p>Тіркелусіз алғашқы сауалнаманызды 2 минутта жасаңыз. Несие картасы талап етілмейді.</p>
+  <div class="cta-btns">
+    <a href="/register.html" class="btn btn-white btn-xl">🚀 Тегін тіркелу</a>
+    <a href="/login.html" class="btn btn-outline-white btn-xl">Кіру →</a>
+    <button class="btn btn-outline-white btn-xl" onclick="showToast('Демо сауалнама жіберілді!')">Демо сауалнама</button>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="footer">
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand-name"><em>Oylar</em></div>
+      <div class="footer-tagline">Қазақстандық бизнес пен студенттерге арналған онлайн сауалнама және пікір жинау платформасы.</div>
+      <div class="footer-social">
+        <button class="social-btn">📘</button>
+        <button class="social-btn">🐦</button>
+        <button class="social-btn">📸</button>
+        <button class="social-btn">💼</button>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Платформа</div>
+      <div class="footer-links">
+        <a class="footer-link" href="#">Мүмкіндіктер</a>
+        <a class="footer-link" href="#">Шаблондар</a>
+        <a class="footer-link" href="#">Аналитика</a>
+        <a class="footer-link" href="#">Интеграция</a>
+        <a class="footer-link" href="#">API</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Компания</div>
+      <div class="footer-links">
+        <a class="footer-link" href="#">Біз туралы</a>
+        <a class="footer-link" href="#">Блог</a>
+        <a class="footer-link" href="#">Тарифтер</a>
+        <a class="footer-link" href="#">Байланыс</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Анықтама</div>
+      <div class="footer-links">
+        <a class="footer-link" href="#">Нұсқаулық</div>
+        <a class="footer-link" href="#">FAQ</a>
+        <a class="footer-link" href="#">Қолдау</a>
+        <a class="footer-link" href="#">Жаңалықтар</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 Oylar. Барлық құқықтар қорғалған.</div>
+    <div class="footer-badges">
+      <span class="footer-badge">React</span>
+      <span class="footer-badge">Node.js</span>
+      <span class="footer-badge">PostgreSQL</span>
+      <span class="footer-badge">REST API</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// Demo survey
+const qs=[
+  {text:"Oylar платформасы туралы не деп ойлайсыз?",opts:["⭐⭐⭐⭐⭐ Өте керемет, ұнайды","⭐⭐⭐⭐ Жақсы, жақсартуға болады","⭐⭐⭐ Орташа деңгей","⭐⭐ Ойлайтын нәрсе бар"]},
+  {text:"Платформаны достарыңызға ұсынар ма едіңіз?",opts:["✅ Иә, міндетті түрде ұсынамын","🤔 Мүмкін, жағдайға байланысты","❌ Жоқ, ұсынбаймын","⏳ Әлі шешпедім"]},
+  {text:"Сізге ең маңызды функция қайсы?",opts:["⚡ Жылдамдық пен қарапайымдылық","📊 Терең аналитика","🔗 Жауаптарды бөлісу","💬 Қолдау қызметі"]}
+];
+let cur=0,ans={};
+
+function renderQ(){
+  const q=qs[cur];
+  document.getElementById('q-num').textContent=(cur+1)+'-сұрақ / '+qs.length;
+  document.getElementById('q-txt').textContent=q.text;
+  document.getElementById('step-lbl').textContent=(cur+1)+' / '+qs.length;
+  document.getElementById('prog').style.width=(((cur+1)/qs.length)*100)+'%';
+  document.getElementById('prev-btn').style.opacity=cur===0?'0.4':'1';
+  document.getElementById('next-btn').textContent=cur===qs.length-1?'Жіберу ✓':'Келесі →';
+  const c=document.getElementById('opts'); c.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const d=document.createElement('button');
+    d.className='opt'+(ans[cur]===i?' sel':'');
+    d.innerHTML='<div class="opt-radio"></div><span class="opt-txt">'+o+'</span>';
+    d.onclick=()=>{ans[cur]=i;renderQ();};
+    c.appendChild(d);
+  });
+}
+
+function nextQ(){
+  if(cur<qs.length-1){cur++;renderQ();}
+  else{
+    document.getElementById('survey-body').innerHTML=`
+      <div style="text-align:center;padding:2.5rem 0">
+        <div style="width:64px;height:64px;background:var(--green-l);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-size:28px">✅</div>
+        <div style="font-size:22px;font-weight:800;color:var(--slate);margin-bottom:8px">Рахмет!</div>
+        <div style="font-size:15px;color:var(--slate-600);margin-bottom:1.5rem">Жауаптарыңыз сәтті жіберілді</div>
+        <button class="btn btn-primary" onclick="cur=0;ans={};document.getElementById('survey-foot').style.display='';renderQ();this.parentNode.parentNode.parentNode.replaceWith(document.getElementById('survey-body'))">Қайта өту</button>
+      </div>`;
+    document.getElementById('survey-foot').style.display='none';
+    document.getElementById('prog').style.width='100%';
+  }
+}
+
+function prevQ(){if(cur>0){cur--;renderQ();}}
+renderQ();
+
+// Visual survey selector
+function selectVis(el){
+  document.querySelectorAll('.vis-opt').forEach(o=>o.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Toast
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent='✓ '+msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// Load stats from API
+fetch('/api/surveys/stats')
+  .then(r=>r.json())
+  .then(s=>{
+    if(s.users){
+      document.getElementById('idx-users1').textContent=s.users;
+      document.getElementById('idx-users2').textContent=s.users;
+      document.getElementById('s-users').textContent=s.users;
+    }
+    if(s.responses) document.getElementById('idx-responses').textContent=s.responses;
+  })
+  .catch(()=>{});
+
+// Navbar auth state
+const userStr=localStorage.getItem('user');
+const user=userStr&&userStr!=='undefined'&&userStr!=='null'?JSON.parse(userStr):null;
+if(user){
+  const nr=document.getElementById('nav-right');
+  const av=user.avatarUrl
+    ?`<img src="${user.avatarUrl}" style="width:28px;height:28px;border-radius:50%;object-fit:cover">`
+    :`<div style="width:28px;height:28px;border-radius:50%;background:var(--indigo);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">${user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>`;
+  nr.innerHTML=`
+    <a href="/dashboard.html" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:7px">${av} Жеке кабинет</a>
+    <button class="btn btn-ghost btn-sm" onclick="localStorage.removeItem('user');location.reload()">Шығу</button>`;
+}
+</script>
+</body>
+</html>
