@@ -21,11 +21,14 @@ router.post('/', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Сауалнама табылмады немесе жабық' });
     }
 
+    // Get userId if authenticated, otherwise null
+    const userId = req.user?.id || null;
+
     const result = await query(
-      `INSERT INTO "Responses" ("surveyId", answers, "createdAt", "updatedAt")
-       VALUES ($1, $2, NOW(), NOW())
+      `INSERT INTO "Responses" ("surveyId", "userId", answers, "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, NOW(), NOW())
        RETURNING id`,
-      [surveyId, JSON.stringify(answers)]
+      [surveyId, userId, JSON.stringify(answers)]
     );
 
     res.status(201).json({

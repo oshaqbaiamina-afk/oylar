@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query } from '../db/index.js';
 import authMiddleware from '../middleware/authMiddleware.js';
+import { uploadAvatar } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -158,6 +159,40 @@ const updateProfile = async (req, res) => {
 };
 router.put('/profile',   authMiddleware, updateProfile);
 router.patch('/profile', authMiddleware, updateProfile);
+
+// ─── POST /api/auth/avatar ── Base64 in DB (no disk, no proxy issues)
+router.post('/avatar', authMiddleware, async (req, res) => {
+  try {
+    const { avatar } = req.body; // base64 data URL: "data:image/jpeg;base64,..."
+    if (!avatar) {
+      return res.status(400).json({ success: false, message: 'Сурет деректері жоқ' });
+    }
+    // Basic validation — must be a data URL
+    if (!avatar.startsWith('data:image/')) {
+      return res.status(400).json({ success: false, message: 'Жарамды сурет форматы емес' });
+    }
+    // Limit size: ~5MB base64 ≈ ~3.75MB actual
+    if (avatar.length > 7 * 1024 * 1024) {
+      return res.status(400).json({ success: false, message: 'Сурет өлшемі тым үлкен (макс. 5MB)' });
+    }
+
+    const result = await query(
+      `UPDATE "Users" SET "avatarUrl" = $1, "updatedAt" = NOW()
+       WHERE id = $2
+       RETURNING id, name, email, bio, "avatarUrl", "createdAt"`,
+      [avatar, req.user.id]
+    );
+    return res.json({
+      success: true,
+      data: result.rows[0],
+      message: 'Аватар сәтті жаңартылды'
+    });
+  } catch (err) {
+    console.error('Avatar DB error:', err);
+    return res.status(500).json({ success: false, message: 'Дерекқор қатесі' });
+  }
+});
+
 
 // ─── POST /api/auth/change-password ────────────────────────
 router.post('/change-password', authMiddleware, async (req, res) => {

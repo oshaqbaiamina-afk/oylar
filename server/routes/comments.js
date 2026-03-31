@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/:surveyId', async (req, res) => {
   try {
     const result = await query(
-      `SELECT c.*, u.name as author_name
+      `SELECT c.*, u.name as author_name, u."avatarUrl" as author_avatar
        FROM "Comments" c
        LEFT JOIN "Users" u ON c."userId" = u.id
        WHERE c."surveyId" = $1
@@ -50,7 +50,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
     // Автор атын қайтару
     const comment = await query(
-      `SELECT c.*, u.name as author_name
+      `SELECT c.*, u.name as author_name, u."avatarUrl" as author_avatar
        FROM "Comments" c
        LEFT JOIN "Users" u ON c."userId" = u.id
        WHERE c.id = $1`,
@@ -72,17 +72,17 @@ router.put('/:id', authMiddleware, async (req, res) => {
     }
 
     const check = await query(
-      'SELECT user_id FROM "Comments" WHERE id = $1', [req.params.id]
+      'SELECT "userId" FROM "Comments" WHERE id = $1', [req.params.id]
     );
     if (check.rows.length === 0) {
       return res.status(404).json({ error: 'Пікір табылмады' });
     }
-    if (check.rows[0].user_id !== req.user.id && req.user.role !== 'admin') {
+    if (check.rows[0].userId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Рұқсат жоқ' });
     }
 
     const result = await query(
-      'UPDATE "Comments" SET text = $1 WHERE id = $2 RETURNING *',
+      'UPDATE "Comments" SET text = $1, "updatedAt" = NOW() WHERE id = $2 RETURNING *',
       [text.trim(), req.params.id]
     );
 
@@ -96,12 +96,12 @@ router.put('/:id', authMiddleware, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const check = await query(
-      'SELECT user_id FROM "Comments" WHERE id = $1', [req.params.id]
+      'SELECT "userId" FROM "Comments" WHERE id = $1', [req.params.id]
     );
     if (check.rows.length === 0) {
       return res.status(404).json({ error: 'Пікір табылмады' });
     }
-    if (check.rows[0].user_id !== req.user.id && req.user.role !== 'admin') {
+    if (check.rows[0].userId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Рұқсат жоқ' });
     }
 

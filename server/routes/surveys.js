@@ -69,7 +69,7 @@ router.get('/', async (req, res) => {
     // Барлық белсенді сауалнамалар
     const result = await query(
       `SELECT s.id, s.title, s.description, s."isPublished", s."createdAt",
-              u.name as author_name,
+              u.name as author_name, u."avatarUrl" as author_avatar,
               (SELECT COUNT(*) FROM "Responses" r WHERE r."surveyId" = s.id)::int as response_count
        FROM "Surveys" s
        LEFT JOIN "Users" u ON s."userId" = u.id
@@ -87,7 +87,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const result = await query(
-      `SELECT s.*, u.name as author_name,
+      `SELECT s.*, u.name as author_name, u."avatarUrl" as author_avatar,
               (SELECT COUNT(*) FROM "Responses" r WHERE r."surveyId" = s.id)::int as response_count
        FROM "Surveys" s
        LEFT JOIN "Users" u ON s."userId" = u.id
@@ -135,15 +135,21 @@ router.get('/:id/results', authMiddleware, async (req, res) => {
     if (!Array.isArray(questions)) questions = [];
 
     const analyzedQuestions = questions.map((q, qIdx) => {
-      const allAnswers = responses.map(r => {
+      const allAnswers = responses.map((r, rIdx) => {
         let ans = r.answers;
-        if (typeof ans === 'string') { try { ans = JSON.parse(ans); } catch { ans = []; } }
+        // Postgres jsonb might already parse it, but if it was double-stringified on insert, we parse it.
+        while (typeof ans === 'string') { 
+          try { ans = JSON.parse(ans); } catch { break; } 
+        }
         if (Array.isArray(ans)) {
-          const found = ans.find(a => a.questionIndex === qIdx);
+          // Safely check a && a.questionIndex since old/invalid answers might have nulls or be primitives
+          const found = ans.find(a => a && typeof a === 'object' && a.questionIndex === qIdx);
           return found ? found.answer : undefined;
         }
         return undefined;
-      }).filter(a => a !== undefined && a !== '');
+      }).filter(a => a !== undefined && a !== '' && a !== null && (!Array.isArray(a) || a.length > 0));
+
+      console.log(`Q${qIdx}: type=${q.type}, answers=${allAnswers.length}, sample=${JSON.stringify(allAnswers.slice(0,2))}`);
 
       if (q.type === 'text') return { ...q, answers: allAnswers };
 
@@ -155,10 +161,11 @@ router.get('/:id/results', authMiddleware, async (req, res) => {
       }
 
       if (q.options && Array.isArray(q.options)) {
-        const optionCounts = q.options.map(opt => ({
-          label: opt,
-          count: allAnswers.filter(a => a === opt || (Array.isArray(a) && a.includes(opt))).length
-        }));
+        const optionCounts = q.options.map(opt => {
+          const count = allAnswers.filter(a => a === opt || (Array.isArray(a) && a.includes(opt))).length;
+          console.log(`  opt "${opt}" count: ${count}`);
+          return { label: opt, count };
+        });
         return { ...q, options: optionCounts, total: allAnswers.length };
       }
 
