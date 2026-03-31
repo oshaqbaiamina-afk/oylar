@@ -1,19 +1,19 @@
 import express from 'express';
-import pool from '../db/index.js';
+import { query } from '../db/index.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// ─── GET /api/comments/:survey_id ─── Пікірлерді алу
-router.get('/:survey_id', async (req, res) => {
+// ─── GET /api/comments/:surveyId ─── Пікірлерді алу
+router.get('/:surveyId', async (req, res) => {
   try {
-    const result = await pool.query(
+    const result = await query(
       `SELECT c.*, u.name as author_name
        FROM "Comments" c
-       LEFT JOIN "Users" u ON c.user_id = u.id
-       WHERE c.survey_id = $1
-       ORDER BY c.created_at DESC`,
-      [req.params.survey_id]
+       LEFT JOIN "Users" u ON c."userId" = u.id
+       WHERE c."surveyId" = $1
+       ORDER BY c."createdAt" DESC`,
+      [req.params.surveyId]
     );
     res.json(result.rows);
   } catch (err) {
@@ -24,9 +24,9 @@ router.get('/:survey_id', async (req, res) => {
 // ─── POST /api/comments ─── Пікір қалдыру
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { survey_id, text } = req.body;
+    const { surveyId, text } = req.body;
 
-    if (!survey_id || !text || text.trim().length === 0) {
+    if (!surveyId || !text || text.trim().length === 0) {
       return res.status(400).json({ error: 'Пікір мәтінін жазыңыз' });
     }
     if (text.length > 1000) {
@@ -34,25 +34,25 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 
     // Сауалнама бар ма тексеру
-    const survey = await pool.query(
-      'SELECT id FROM "Surveys" WHERE id = $1', [survey_id]
+    const survey = await query(
+      'SELECT id FROM "Surveys" WHERE id = $1', [surveyId]
     );
     if (survey.rows.length === 0) {
       return res.status(404).json({ error: 'Сауалнама табылмады' });
     }
 
-    const result = await pool.query(
-      `INSERT INTO "Comments" (survey_id, user_id, text)
-       VALUES ($1, $2, $3)
+    const result = await query(
+      `INSERT INTO "Comments" ("surveyId", "userId", text, "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, NOW(), NOW())
        RETURNING *`,
-      [survey_id, req.user.id, text.trim()]
+      [surveyId, req.user.id, text.trim()]
     );
 
     // Автор атын қайтару
-    const comment = await pool.query(
+    const comment = await query(
       `SELECT c.*, u.name as author_name
        FROM "Comments" c
-       LEFT JOIN "Users" u ON c.user_id = u.id
+       LEFT JOIN "Users" u ON c."userId" = u.id
        WHERE c.id = $1`,
       [result.rows[0].id]
     );
@@ -71,7 +71,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Пікір мәтіні бос болмауы керек' });
     }
 
-    const check = await pool.query(
+    const check = await query(
       'SELECT user_id FROM "Comments" WHERE id = $1', [req.params.id]
     );
     if (check.rows.length === 0) {
@@ -81,7 +81,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Рұқсат жоқ' });
     }
 
-    const result = await pool.query(
+    const result = await query(
       'UPDATE "Comments" SET text = $1 WHERE id = $2 RETURNING *',
       [text.trim(), req.params.id]
     );
@@ -95,7 +95,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 // ─── DELETE /api/comments/:id ─── Пікірді жою
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    const check = await pool.query(
+    const check = await query(
       'SELECT user_id FROM "Comments" WHERE id = $1', [req.params.id]
     );
     if (check.rows.length === 0) {
@@ -105,7 +105,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Рұқсат жоқ' });
     }
 
-    await pool.query('DELETE FROM "Comments" WHERE id = $1', [req.params.id]);
+    await query('DELETE FROM "Comments" WHERE id = $1', [req.params.id]);
     res.json({ message: 'Пікір жойылды' });
   } catch (err) {
     res.status(500).json({ error: 'Жою қатесі' });

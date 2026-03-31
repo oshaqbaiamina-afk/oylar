@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тіркелу — Oylar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --indigo:#4F46E5;--indigo-d:#3730A3;--indigo-l:#EEF2FF;--indigo-xl:#E0E7FF;
+  --amber:#F59E0B;--amber-l:#FFFBEB;--amber-d:#92400E;
+  --rose:#F43F5E;--rose-l:#FFF1F2;--rose-d:#9F1239;
+  --sky:#0EA5E9;--sky-l:#F0F9FF;--sky-d:#0369A1;
+  --green:#10B981;--green-l:#ECFDF5;
+  --slate:#0F172A;--slate-700:#334155;--slate-600:#475569;--slate-400:#94A3B8;--slate-300:#CBD5E1;--slate-200:#E2E8F0;--slate-100:#F1F5F9;--slate-50:#F8FAFC;
+  --white:#fff;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --shadow:0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+  --radius:12px;--radius-lg:20px;--radius-xl:28px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--white);color:var(--slate);line-height:1.6;min-height:100vh}
+
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .18s;white-space:nowrap}
+.btn-sm{padding:7px 16px;font-size:13px;border-radius:8px}
+.btn-lg{padding:14px 30px;font-size:15px;border-radius:12px;width:100%}
+.btn-primary{background:var(--indigo);color:white;box-shadow:0 2px 8px rgba(79,70,229,.35)}
+.btn-primary:hover{background:var(--indigo-d);box-shadow:0 4px 16px rgba(79,70,229,.4);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-ghost{background:transparent;color:var(--slate-600);border:1.5px solid var(--slate-300)}
+.btn-ghost:hover{background:var(--slate-100);border-color:var(--slate-400)}
+.btn-google{background:var(--white);color:var(--slate);border:1.5px solid var(--slate-200);box-shadow:var(--shadow-sm);width:100%}
+.btn-google:hover{background:var(--slate-50);border-color:var(--slate-300);box-shadow:var(--shadow)}
+
+/* ─── NAVBAR ─── */
+.nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:68px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--slate-200);box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand-mark{width:38px;height:38px;background:var(--indigo);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(79,70,229,.3)}
+.brand-mark svg{width:20px;height:20px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round}
+.brand-name{font-size:20px;font-weight:800;color:var(--slate);letter-spacing:-.5px}
+.brand-name em{color:var(--indigo);font-style:normal}
+.nav-right{display:flex;gap:8px;align-items:center}
+.nav-hint{font-size:13px;color:var(--slate-600)}
+.nav-hint a{color:var(--indigo);font-weight:600;text-decoration:none}
+.nav-hint a:hover{text-decoration:underline}
+
+/* ─── PAGE LAYOUT ─── */
+.page{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 68px)}
+
+/* ─── LEFT PANEL (форма) ─── */
+.left{display:flex;flex-direction:column;justify-content:center;padding:3.5rem 4rem;position:relative;z-index:1}
+
+.page-label{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--indigo);text-transform:uppercase;margin-bottom:.5rem}
+.page-title{font-size:32px;font-weight:800;letter-spacing:-.8px;color:var(--slate);margin-bottom:.5rem;line-height:1.2}
+.page-sub{font-size:15px;color:var(--slate-600);margin-bottom:2rem;line-height:1.6}
+
+/* ─── DIVIDER ─── */
+.divider{display:flex;align-items:center;gap:12px;margin:1.5rem 0}
+.divider-line{flex:1;height:1px;background:var(--slate-200)}
+.divider-text{font-size:12px;color:var(--slate-400);font-weight:600;white-space:nowrap}
+
+/* ─── FORM ─── */
+.form{display:flex;flex-direction:column;gap:16px}
+
+.field{display:flex;flex-direction:column;gap:6px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.label{font-size:13px;font-weight:600;color:var(--slate-700)}
+.label span{color:var(--rose)}
+
+.input-wrap{position:relative}
+.input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--slate-400);font-size:16px;pointer-events:none;transition:color .15s}
+.input{width:100%;padding:11px 14px 11px 42px;border:1.5px solid var(--slate-200);border-radius:10px;font-size:14px;font-family:inherit;color:var(--slate);background:var(--white);transition:all .15s;outline:none}
+.input:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+.input:focus + .input-icon, .input-wrap:focus-within .input-icon{color:var(--indigo)}
+.input.error{border-color:var(--rose);box-shadow:0 0 0 3px rgba(244,63,94,.08)}
+.input-no-icon{padding-left:14px}
+
+.password-wrap{position:relative}
+.toggle-pass{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--slate-400);font-size:18px;padding:4px;transition:color .15s;line-height:1}
+.toggle-pass:hover{color:var(--slate-600)}
+
+.field-hint{font-size:12px;color:var(--slate-400)}
+.field-error{font-size:12px;color:var(--rose);font-weight:500;display:none;align-items:center;gap:4px}
+.field-error.show{display:flex}
+
+/* ─── PASSWORD STRENGTH ─── */
+.strength-wrap{margin-top:6px}
+.strength-bars{display:flex;gap:4px;margin-bottom:5px}
+.strength-bar{flex:1;height:3px;border-radius:2px;background:var(--slate-200);transition:background .3s}
+.strength-bar.weak{background:var(--rose)}
+.strength-bar.medium{background:var(--amber)}
+.strength-bar.strong{background:var(--green)}
+.strength-label{font-size:11px;font-weight:600;color:var(--slate-400)}
+.strength-label.weak{color:var(--rose)}
+.strength-label.medium{color:var(--amber-d)}
+.strength-label.strong{color:var(--green)}
+
+/* ─── CHECKBOX ─── */
+.check-row{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+.check-box{width:18px;height:18px;border:1.5px solid var(--slate-300);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;margin-top:1px}
+.check-row input{display:none}
+.check-row input:checked ~ .check-box{background:var(--indigo);border-color:var(--indigo)}
+.check-row input:checked ~ .check-box::after{content:'✓';color:white;font-size:11px;font-weight:700}
+.check-text{font-size:13px;color:var(--slate-600);line-height:1.5}
+.check-text a{color:var(--indigo);font-weight:600;text-decoration:none}
+.check-text a:hover{text-decoration:underline}
+
+/* ─── SUBMIT ─── */
+.submit-btn{margin-top:4px}
+
+.login-link{text-align:center;font-size:14px;color:var(--slate-600);margin-top:1.2rem}
+.login-link a{color:var(--indigo);font-weight:600;text-decoration:none}
+.login-link a:hover{text-decoration:underline}
+
+/* ─── TRUST BADGES ─── */
+.trust-row{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--slate-100)}
+.trust-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--slate-400);font-weight:500}
+.trust-icon{font-size:14px}
+
+/* ─── RIGHT PANEL ─── */
+.right{background:linear-gradient(135deg,var(--indigo-l) 0%,#E0E7FF 100%);display:flex;align-items:center;justify-content:center;padding:2.5rem;position:relative;overflow:hidden}
+.right::before{content:'';position:absolute;bottom:-80px;right:-80px;width:350px;height:350px;border-radius:50%;background:rgba(79,70,229,.08)}
+.right::after{content:'';position:absolute;top:-60px;left:-40px;width:250px;height:250px;border-radius:50%;background:rgba(79,70,229,.05)}
+
+.right-content{width:100%;max-width:380px;position:relative;z-index:1;display:flex;flex-direction:column;gap:16px}
+
+/* ─── BENEFIT CARDS ─── */
+.benefit-header{margin-bottom:8px}
+.benefit-title{font-size:22px;font-weight:800;color:var(--slate);letter-spacing:-.5px;margin-bottom:6px}
+.benefit-sub{font-size:14px;color:var(--slate-600);line-height:1.6}
+
+.benefit-card{background:white;border-radius:16px;padding:16px 18px;border:1px solid var(--slate-200);box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;transition:transform .2s}
+.benefit-card:hover{transform:translateX(4px)}
+.benefit-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.bi-indigo{background:var(--indigo-l)}
+.bi-green{background:var(--green-l)}
+.bi-amber{background:var(--amber-l)}
+.bi-rose{background:var(--rose-l)}
+.benefit-info{}
+.benefit-name{font-size:14px;font-weight:700;color:var(--slate);margin-bottom:2px}
+.benefit-desc{font-size:12px;color:var(--slate-600)}
+
+/* ─── STATS ROW ─── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+.mini-stat{background:white;border-radius:12px;padding:14px 10px;text-align:center;border:1px solid var(--slate-200);box-shadow:var(--shadow-sm)}
+.mini-stat-n{font-size:20px;font-weight:800;color:var(--indigo);letter-spacing:-.5px}
+.mini-stat-l{font-size:11px;color:var(--slate-600);font-weight:500;margin-top:2px}
+
+/* ─── TOAST ─── */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px}
+.toast.success{background:var(--slate);color:white}
+.toast.error-t{background:var(--rose);color:white}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ─── LOADING OVERLAY ─── */
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.7);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
+.loading-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid var(--indigo-xl);border-top-color:var(--indigo);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  .page{grid-template-columns:1fr}
+  .right{display:none}
+  .left{padding:2.5rem 2rem}
+}
+@media(max-width:480px){
+  .nav{padding:0 1.2rem}
+  .left{padding:2rem 1.2rem}
+  .field-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── LOADING ─── -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+</div>
+
+<!-- ─── NAVBAR ─── -->
+<nav class="nav">
+  <a href="/" class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <span class="brand-name"><em>Oylar</em></span>
+  </a>
+  <div class="nav-right" id="nav-right">
+    <a href="/login.html" class="btn btn-ghost btn-sm">Кіру</a>
+    <a href="/register.html" class="btn btn-primary btn-sm">Тегін тіркелу</a>
+  </div>
+</nav>
+
+<!-- ─── MAIN ─── -->
+<div class="page">
+
+  <!-- LEFT: FORM -->
+  <div class="left">
+
+    <div class="page-label">Бастау</div>
+    <h1 class="page-title">Тіркелу</h1>
+    <p class="page-sub">Тегін аккаунт жасаңыз және өз опросыңызды бүгін жариялаңыз.</p>
+
+    <!-- Google OAuth -->
+    <button class="btn btn-google btn-lg" onclick="handleGoogleAuth()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/><path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Google арқылы тіркелу
+    </button>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-text">немесе email арқылы</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <form class="form" id="registerForm" onsubmit="handleSubmit(event)" novalidate>
+
+      <!-- Аты-жөні -->
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Аты <span>*</span></label>
+          <div class="input-wrap">
+            <input class="input" type="text" id="firstName" placeholder="Асқар" autocomplete="given-name" oninput="clearErr('firstName')">
+            <span class="input-icon">👤</span>
+          </div>
+          <span class="field-error" id="err-firstName">⚠ Атыңызды енгізіңіз</span>
+        </div>
+        <div class="field">
+          <label class="label">Тегі <span>*</span></label>
+          <div class="input-wrap">
+            <input class="input" type="text" id="lastName" placeholder="Сейткали" autocomplete="family-name" oninput="clearErr('lastName')">
+            <span class="input-icon">👤</span>
+          </div>
+          <span class="field-error" id="err-lastName">⚠ Тегіңізді енгізіңіз</span>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="field">
+        <label class="label">Email <span>*</span></label>
+        <div class="input-wrap">
+          <input class="input" type="email" id="email" placeholder="askar@example.com" autocomplete="email" oninput="clearErr('email')">
+          <span class="input-icon">✉️</span>
+        </div>
+        <span class="field-error" id="err-email">⚠ Дұрыс email енгізіңіз</span>
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <label class="label">Құпия сөз <span>*</span></label>
+        <div class="input-wrap password-wrap">
+          <input class="input" type="password" id="password" placeholder="Кемінде 8 символ" autocomplete="new-password" oninput="checkStrength(); clearErr('password')">
+          <span class="input-icon">🔒</span>
+          <button type="button" class="toggle-pass" id="togglePass" onclick="togglePassword('password','togglePass')">👁</button>
+        </div>
+        <div class="strength-wrap" id="strengthWrap" style="display:none">
+          <div class="strength-bars">
+            <div class="strength-bar" id="sb1"></div>
+            <div class="strength-bar" id="sb2"></div>
+            <div class="strength-bar" id="sb3"></div>
+            <div class="strength-bar" id="sb4"></div>
+          </div>
+          <span class="strength-label" id="strengthLabel"></span>
+        </div>
+        <span class="field-error" id="err-password">⚠ Кемінде 8 символ енгізіңіз</span>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="field">
+        <label class="label">Құпия сөзді растаңыз <span>*</span></label>
+        <div class="input-wrap password-wrap">
+          <input class="input" type="password" id="confirmPass" placeholder="Қайта енгізіңіз" autocomplete="new-password" oninput="clearErr('confirmPass')">
+          <span class="input-icon">🔒</span>
+          <button type="button" class="toggle-pass" id="toggleConfirm" onclick="togglePassword('confirmPass','toggleConfirm')">👁</button>
+        </div>
+        <span class="field-error" id="err-confirmPass">⚠ Құпия сөздер сәйкес келмейді</span>
+      </div>
+
+      <!-- Terms -->
+      <div class="field">
+        <label class="check-row">
+          <input type="checkbox" id="terms" onchange="clearErr('terms')">
+          <div class="check-box" id="checkBox"></div>
+          <span class="check-text">
+            <a href="#">Пайдалану шарттарымен</a> және <a href="#">Құпиялылық саясатымен</a> келісемін
+          </span>
+        </label>
+        <span class="field-error" id="err-terms">⚠ Шарттарды қабылдау қажет</span>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn btn-primary btn-lg submit-btn" id="submitBtn">
+        Тіркелу — Тегін 🚀
+      </button>
+
+    </form>
+
+    <p class="login-link">Аккаунтыңыз бар ма? <a href="/login.html">Кіру →</a></p>
+
+    <!-- Trust -->
+    <div class="trust-row">
+      <div class="trust-item"><span class="trust-icon">🔒</span> SSL қауіпсіздік</div>
+      <div class="trust-item"><span class="trust-icon">✅</span> Тегін тіркелу</div>
+      <div class="trust-item"><span class="trust-icon">🚫</span> Спам жоқ</div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: VISUAL -->
+  <div class="right">
+    <div class="right-content">
+
+      <div class="benefit-header">
+        <div class="benefit-title">Oylar-ға қош келдіңіз! 👋</div>
+        <div class="benefit-sub">Тіркелгеннен кейін мына мүмкіндіктер қол жетімді болады:</div>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon bi-indigo">📊</div>
+        <div class="benefit-info">
+          <div class="benefit-name">Шексіз опростар жасаңыз</div>
+          <div class="benefit-desc">Кез келген тақырыпта сауалнама құрастырыңыз</div>
+        </div>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon bi-green">⚡</div>
+        <div class="benefit-info">
+          <div class="benefit-name">Нәтижелерді нақты уақытта көріңіз</div>
+          <div class="benefit-desc">Жауаптар мен аналитика бірден жаңарады</div>
+        </div>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon bi-amber">🔗</div>
+        <div class="benefit-info">
+          <div class="benefit-name">Опросты оңай бөлісіңіз</div>
+          <div class="benefit-desc">Бір сілтеме арқылы кез келген адамға жіберіңіз</div>
+        </div>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon bi-rose">💬</div>
+        <div class="benefit-info">
+          <div class="benefit-name">Пікірлер мен талдау</div>
+          <div class="benefit-desc">Қатысушылардан пікір жинаңыз</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="mini-stat">
+          <div class="mini-stat-n">1.2K+</div>
+          <div class="mini-stat-l">Қолданушы</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-n">8.5K+</div>
+          <div class="mini-stat-l">Опрос</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-n">42K+</div>
+          <div class="mini-stat-l">Жауап</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── PASSWORD TOGGLE ───
+function togglePassword(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁';
+  }
+}
+
+// ─── PASSWORD STRENGTH ───
+function checkStrength() {
+  const val = document.getElementById('password').value;
+  const wrap = document.getElementById('strengthWrap');
+  const label = document.getElementById('strengthLabel');
+  const bars = [document.getElementById('sb1'), document.getElementById('sb2'), document.getElementById('sb3'), document.getElementById('sb4')];
+
+  if (!val) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const classes = ['', 'weak', 'medium', 'medium', 'strong'];
+  const labels = ['', 'Өте әлсіз', 'Орташа', 'Жақсы', 'Күшті 💪'];
+
+  bars.forEach((bar, i) => {
+    bar.className = 'strength-bar';
+    if (i < score) bar.classList.add(classes[score]);
+  });
+  label.className = 'strength-label ' + classes[score];
+  label.textContent = labels[score] || '';
+}
+
+// ─── CLEAR ERROR ───
+function clearErr(id) {
+  const input = document.getElementById(id);
+  const err = document.getElementById('err-' + id);
+  if (input) input.classList.remove('error');
+  if (err) err.classList.remove('show');
+}
+
+// ─── SHOW ERROR ───
+function showErr(id, msg) {
+  const input = document.getElementById(id);
+  const err = document.getElementById('err-' + id);
+  if (input) input.classList.add('error');
+  if (err) {
+    if (msg) err.textContent = '⚠ ' + msg;
+    err.classList.add('show');
+  }
+  return false;
+}
+
+// ─── VALIDATE ───
+function validate() {
+  let ok = true;
+  const fn = document.getElementById('firstName').value.trim();
+  const ln = document.getElementById('lastName').value.trim();
+  const em = document.getElementById('email').value.trim();
+  const pw = document.getElementById('password').value;
+  const cp = document.getElementById('confirmPass').value;
+  const terms = document.getElementById('terms').checked;
+
+  if (!fn) { showErr('firstName', 'Атыңызды енгізіңіз'); ok = false; }
+  if (!ln) { showErr('lastName', 'Тегіңізді енгізіңіз'); ok = false; }
+  if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { showErr('email', 'Дұрыс email енгізіңіз'); ok = false; }
+  if (pw.length < 8) { showErr('password', 'Кемінде 8 символ қажет'); ok = false; }
+  if (pw !== cp) { showErr('confirmPass', 'Құпия сөздер сәйкес келмейді'); ok = false; }
+  if (!terms) { showErr('terms', 'Шарттарды қабылдау қажет'); ok = false; }
+
+  return ok;
+}
+
+// ─── TOAST ───
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+  t.className = 'toast ' + (type === 'success' ? 'success' : 'error-t') + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── SUBMIT ───
+async function handleSubmit(e) {
+  e.preventDefault();
+  if (!validate()) return;
+
+  const btn = document.getElementById('submitBtn');
+  const overlay = document.getElementById('loading');
+
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite"></div> Тіркелуде...';
+  overlay.classList.add('show');
+
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('firstName').value.trim() + ' ' + document.getElementById('lastName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Тіркелу қатесі');
+    }
+
+    // Сохраняем токен и пользователя
+    localStorage.setItem('token', data.data.token);
+    localStorage.setItem('user', JSON.stringify(data.data.user));
+
+    showToast('Тіркелу сәтті өтті! Жеке кабинетке өтуде...');
+    setTimeout(() => { window.location.href = '/dashboard.html'; }, 1500);
+
+  } catch (err) {
+    overlay.classList.remove('show');
+    btn.disabled = false;
+    btn.innerHTML = 'Тіркелу — Тегін 🚀';
+    showToast(err.message || 'Қате орын алды', 'error');
+
+    // Если email уже занят
+    if (err.message && err.message.toLowerCase().includes('email')) {
+      showErr('email', 'Бұл email тіркелген');
+    }
+  }
+}
+
+// ─── GOOGLE AUTH (заглушка) ───
+function handleGoogleAuth() {
+  showToast('Google OAuth жақында қосылады 🔜');
+}
+
+// ─── CHECKBOX visual sync ───
+document.getElementById('terms').addEventListener('change', function() {
+  const box = document.getElementById('checkBox');
+  if (this.checked) {
+    box.style.background = 'var(--indigo)';
+    box.style.borderColor = 'var(--indigo)';
+    box.innerHTML = '<span style="color:white;font-size:11px;font-weight:700">✓</span>';
+  } else {
+    box.style.background = '';
+    box.style.borderColor = '';
+    box.innerHTML = '';
+  }
+});
+
+// ─── Fetch stats ───
+fetch('/api/surveys/stats')
+  .then(r => r.json())
+  .then(s => {
+    if (s.users) document.querySelectorAll('.mini-stat-n')[0].textContent = s.users + '+';
+    if (s.surveys) document.querySelectorAll('.mini-stat-n')[1].textContent = s.surveys + '+';
+    if (s.responses) document.querySelectorAll('.mini-stat-n')[2].textContent = s.responses + '+';
+  })
+  .catch(() => {});
+</script>
+</body>
+</html>

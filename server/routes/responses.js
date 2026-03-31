@@ -1,5 +1,5 @@
 import express from 'express';
-import pool from '../db/index.js';
+import { query } from '../db/index.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -7,98 +7,107 @@ const router = express.Router();
 // ─── POST /api/responses ─── Жауап жіберу (авторизациясыз да болады)
 router.post('/', async (req, res) => {
   try {
-    const { survey_id, answers } = req.body;
+    const { surveyId, answers } = req.body;
 
-    if (!survey_id || !answers) {
-      return res.status(400).json({ error: 'survey_id пен answers міндетті' });
+    if (!surveyId || !answers) {
+      return res.status(400).json({ success: false, message: 'surveyId мен answers міндетті' });
     }
 
-    // Сауалнама бар ма?
-    const survey = await pool.query(
-      'SELECT id FROM "Surveys" WHERE id = $1 AND is_active = true', [survey_id]
+    const survey = await query(
+      'SELECT id FROM "Surveys" WHERE id = $1 AND "isPublished" = true',
+      [surveyId]
     );
     if (survey.rows.length === 0) {
-      return res.status(404).json({ error: 'Сауалнама табылмады немесе жабық' });
+      return res.status(404).json({ success: false, message: 'Сауалнама табылмады немесе жабық' });
     }
 
-    // Жауапты сақтау
-    const result = await pool.query(
-      `INSERT INTO "Responses" (survey_id, answers)
-       VALUES ($1, $2)
-       RETURNING *`,
-      [survey_id, JSON.stringify(answers)]
+    const result = await query(
+      `INSERT INTO "Responses" ("surveyId", answers, "createdAt", "updatedAt")
+       VALUES ($1, $2, NOW(), NOW())
+       RETURNING id`,
+      [surveyId, JSON.stringify(answers)]
     );
 
-    res.status(201).json({ message: 'Жауабыңыз сақталды!', id: result.rows[0].id });
+    res.status(201).json({
+      success: true,
+      data: { id: result.rows[0].id },
+      message: 'Жауабыңыз сақталды!'
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Жауапты сақтау қатесі' });
+    console.error('Submit response error:', err);
+    res.status(500).json({ success: false, message: 'Жауапты сақтау қатесі' });
   }
 });
 
-// ─── GET /api/responses/:survey_id ─── Сауалнама жауаптары (тек автор)
-router.get('/:survey_id', authMiddleware, async (req, res) => {
+// ─── GET /api/responses/:surveyId ─── Барлық жауаптар (тек автор)
+router.get('/:surveyId', authMiddleware, async (req, res) => {
   try {
-    // Сауалнама авторын тексеру
-    const survey = await pool.query(
-      'SELECT user_id FROM "Surveys" WHERE id = $1', [req.params.survey_id]
+    const survey = await query(
+      'SELECT "userId" FROM "Surveys" WHERE id = $1',
+      [req.params.surveyId]
     );
     if (survey.rows.length === 0) {
-      return res.status(404).json({ error: 'Сауалнама табылмады' });
+      return res.status(404).json({ success: false, message: 'Сауалнама табылмады' });
     }
-    if (survey.rows[0].user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Рұқсат жоқ' });
+    if (survey.rows[0].userId !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Рұқсат жоқ' });
     }
 
-    const result = await pool.query(
-      'SELECT * FROM "Responses" WHERE survey_id = $1 ORDER BY created_at DESC',
-      [req.params.survey_id]
+    const result = await query(
+      'SELECT * FROM "Responses" WHERE "surveyId" = $1 ORDER BY "createdAt" DESC',
+      [req.params.surveyId]
     );
-
-    res.json(result.rows);
+    res.json({ success: true, data: result.rows });
   } catch (err) {
-    res.status(500).json({ error: 'Жауаптарды алу қатесі' });
+    console.error('Get responses error:', err);
+    res.status(500).json({ success: false, message: 'Жауаптарды алу қатесі' });
   }
 });
 
-// ─── GET /api/responses/:survey_id/stats ─── Нәтиже статистикасы
-router.get('/:survey_id/stats', authMiddleware, async (req, res) => {
+// ─── GET /api/responses/:surveyId/stats ───
+router.get('/:surveyId/stats', authMiddleware, async (req, res) => {
   try {
-    const survey = await pool.query(
-      'SELECT user_id, questions FROM "Surveys" WHERE id = $1',
-      [req.params.survey_id]
+    const survey = await query(
+      'SELECT "userId" FROM "Surveys" WHERE id = $1',
+      [req.params.surveyId]
     );
     if (survey.rows.length === 0) {
-      return res.status(404).json({ error: 'Сауалнама табылмады' });
+      return res.status(404).json({ success: false, message: 'Сауалнама табылмады' });
     }
-    if (survey.rows[0].user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Рұқсат жоқ' });
+    if (survey.rows[0].userId !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Рұқсат жоқ' });
     }
 
-    const responses = await pool.query(
-      'SELECT answers, created_at FROM "Responses" WHERE survey_id = $1',
-      [req.params.survey_id]
+    const responses = await query(
+      'SELECT answers, "createdAt" FROM "Responses" WHERE "surveyId" = $1',
+      [req.params.surveyId]
     );
 
     res.json({
-      total:     responses.rows.length,
-      responses: responses.rows,
+      success: true,
+      data: {
+        total: responses.rows.length,
+        responses: responses.rows,
+      }
     });
   } catch (err) {
-    res.status(500).json({ error: 'Статистика алу қатесі' });
+    console.error('Stats error:', err);
+    res.status(500).json({ success: false, message: 'Статистика алу қатесі' });
   }
 });
 
-// ─── DELETE /api/responses/:id ─── Жауапты жою
+// ─── DELETE /api/responses/:id ─── (тек admin)
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Тек admin жоя алады' });
+    const response = await query('SELECT id FROM "Responses" WHERE id = $1', [req.params.id]);
+    if (response.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Жауап табылмады' });
     }
-    await pool.query('DELETE FROM "Responses" WHERE id = $1', [req.params.id]);
-    res.json({ message: 'Жауап жойылды' });
+    await query('DELETE FROM "Responses" WHERE id = $1', [req.params.id]);
+    res.json({ success: true, message: 'Жауап жойылды' });
   } catch (err) {
-    res.status(500).json({ error: 'Жою қатесі' });
+    console.error('Delete response error:', err);
+    res.status(500).json({ success: false, message: 'Жою қатесі' });
   }
 });
 

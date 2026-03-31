@@ -1,111 +1,213 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import pool from '../db/index.js';
+import { query } from '../db/index.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// ─── POST /api/auth/register ─────────────────────────────
+// ─── POST /api/auth/register ───────────────────────────────
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Валидация
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Барлық өрістерді толтырыңыз' });
+    if (!name?.trim() || !email?.trim() || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Барлық өрістерді толтырыңыз: аты, email, құпия сөз'
+      });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Пароль кемінде 6 символ болуы керек' });
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Құпия сөз кемінде 8 символ болуы керек'
+      });
     }
 
-    // Email бар ма тексеру
-    const existing = await pool.query(
-      'SELECT id FROM "Users" WHERE email = $1', [email]
+    const exists = await query('SELECT id FROM "Users" WHERE email = $1', [email.toLowerCase().trim()]);
+    if (exists.rows.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Бұл email тіркеліп қойған'
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    const result = await query(
+      `INSERT INTO "Users" (name, email, password, "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, NOW(), NOW())
+       RETURNING id, name, email, "createdAt", "updatedAt"`,
+      [name.trim(), email.toLowerCase().trim(), passwordHash]
     );
-    if (existing.rows.length > 0) {
-      return res.status(409).json({ error: 'Бұл email тіркелген' });
-    }
 
-    // Парольді шифрлау
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Пайдаланушы жасау
-    const result = await pool.query(
-      'INSERT INTO "Users" (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role',
-      [name, email, passwordHash, 'user']
-    );
     const user = result.rows[0];
-
-    // JWT жасау
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '30d' }
     );
 
-    res.status(201).json({ user, token });
+    // Фронтенд user + token күтеді
+    return res.status(201).json({
+      success: true,
+      data: { user, token },
+      message: 'Тіркелу сәтті аяқталды'
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Тіркеу кезінде қате шықты' });
+    console.error('Register error:', err);
+    return res.status(500).json({ success: false, message: 'Сервер қатесі' });
   }
 });
 
-// ─── POST /api/auth/login ─────────────────────────────────
+// ─── POST /api/auth/login ──────────────────────────────────
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email мен паролді енгізіңіз' });
+    if (!email?.trim() || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email мен құпия сөзді енгізіңіз'
+      });
     }
 
-    // Пайдаланушыны іздеу
-    const result = await pool.query(
-      'SELECT * FROM "Users" WHERE email = $1', [email]
-    );
+    const result = await query('SELECT * FROM "Users" WHERE email = $1', [email.toLowerCase().trim()]);
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Email немесе пароль қате' });
+      return res.status(400).json({
+        success: false,
+        message: 'Мұндай пайдаланушы табылмады'
+      });
     }
 
     const user = result.rows[0];
-
-    // Парольді тексеру
-    const isMatch = await bcrypt.compare(password, user.password_hash);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Email немесе пароль қате' });
+      return res.status(400).json({
+        success: false,
+        message: 'Құпия сөз дұрыс емес'
+      });
     }
 
-    // JWT жасау
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '30d' }
     );
 
-    res.json({
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
-      token
+    // Парольді алып тастап user қайтару
+    const { password: _pw, ...userWithoutPassword } = user;
+
+    return res.json({
+      success: true,
+      data: { user: userWithoutPassword, token },
+      message: 'Қош келдіңіз!'
     });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Кіру кезінде қате шықты' });
+    console.error('Login error:', err);
+    return res.status(500).json({ success: false, message: 'Сервер қатесі' });
   }
 });
 
-// ─── GET /api/auth/me ─────────────────────────────────────
+// ─── GET /api/auth/me ──────────────────────────────────────
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT id, name, email, role FROM "Users" WHERE id = $1', [req.user.id]
+    const result = await query(
+      `SELECT id, name, email, "avatarUrl", bio, "createdAt"
+       FROM "Users" WHERE id = $1`,
+      [req.user.id]
     );
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Пайдаланушы табылмады' });
+      return res.status(404).json({ success: false, message: 'Пайдаланушы табылмады' });
     }
-    res.json(result.rows[0]);
+    return res.json({ success: true, data: result.rows[0] });
   } catch (err) {
-    res.status(500).json({ error: 'Деректерді алу қатесі' });
+    console.error('Me error:', err);
+    return res.status(500).json({ success: false, message: 'Сервер қатесі' });
   }
 });
+
+// ─── PUT /api/auth/profile ─── Профиль жаңарту (PUT + PATCH екеуі де жұмыс істейді)
+const updateProfile = async (req, res) => {
+  try {
+    const { name, bio, avatarUrl } = req.body;
+    if (!name?.trim()) {
+      return res.status(400).json({ success: false, message: 'Аты міндетті' });
+    }
+
+    const result = await query(
+      `UPDATE "Users"
+       SET name = $1, bio = $2, "avatarUrl" = $3
+       WHERE id = $4
+       RETURNING id, name, email, bio, "avatarUrl", "createdAt"`,
+      [name.trim(), bio?.trim() || null, avatarUrl || null, req.user.id]
+    );
+
+    return res.json({
+      success: true,
+      data: result.rows[0],
+      message: 'Профиль сәтті жаңартылды'
+    });
+  } catch (err) {
+    console.error('Profile update error:', err);
+    return res.status(500).json({ success: false, message: 'Сервер қатесі' });
+  }
+};
+router.put('/profile',   authMiddleware, updateProfile);
+router.patch('/profile', authMiddleware, updateProfile);
+
+// ─── POST /api/auth/change-password ────────────────────────
+router.post('/change-password', authMiddleware, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Екі парольді де енгізіңіз' });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ success: false, message: 'Жаңа пароль кемінде 8 символ' });
+    }
+
+    const result = await query('SELECT password FROM "Users" WHERE id = $1', [req.user.id]);
+    const isMatch = await bcrypt.compare(oldPassword, result.rows[0].password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Ағымдағы пароль дұрыс емес' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const newHash = await bcrypt.hash(newPassword, salt);
+    await query('UPDATE "Users" SET password = $1 WHERE id = $2', [newHash, req.user.id]);
+
+    return res.json({ success: true, message: 'Пароль сәтті өзгертілді' });
+  } catch (err) {
+    console.error('Change password error:', err);
+    return res.status(500).json({ success: false, message: 'Сервер қатесі' });
+  }
+});
+
+// ─── DELETE /api/auth/account ───────────────────────────────
+// dashboard.html: api('/auth/delete', { method: 'DELETE' })
+router.delete('/account', authMiddleware, deleteAccount);
+router.delete('/delete',  authMiddleware, deleteAccount);
+
+async function deleteAccount(req, res) {
+  try {
+    const userId = req.user.id;
+    await query('BEGIN');
+    await query(`DELETE FROM "Responses" WHERE survey_id IN (SELECT id FROM "Surveys" WHERE user_id = $1)`, [userId]);
+    await query(`DELETE FROM "Comments"  WHERE user_id = $1 OR survey_id IN (SELECT id FROM "Surveys" WHERE user_id = $1)`, [userId]);
+    await query('DELETE FROM "Surveys" WHERE user_id = $1', [userId]);
+    await query('DELETE FROM "Users"   WHERE id = $1',      [userId]);
+    await query('COMMIT');
+    return res.json({ success: true, message: 'Аккаунт жойылды' });
+  } catch (err) {
+    await query('ROLLBACK');
+    console.error('Delete account error:', err);
+    return res.status(500).json({ success: false, message: 'Жою қатесі' });
+  }
+}
 
 export default router;
