@@ -65,6 +65,7 @@ const DashboardPage = () => {
   const navigate = useNavigate()
   const user = getUser()
   const chartInstances = useRef([])
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   if (!isLoggedIn()) {
     navigate('/login', { replace: true })
@@ -112,9 +113,15 @@ const DashboardPage = () => {
     setTimeout(() => setToast({ show: false, msg: '', type: 's' }), 3000)
   }
 
+  const setActiveSectionWithClose = (section) => {
+    setActiveSection(section)
+    setMobileSidebarOpen(false)
+  }
+
   const handleLogout = () => {
     clearAuth()
     navigate('/login', { replace: true })
+    setMobileSidebarOpen(false)
   }
 
   const loadOverview = async () => {
@@ -517,14 +524,23 @@ const DashboardPage = () => {
   return (
     <div className="dashboard-page">
       <nav className="nav" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }}>
-        <Link to="/main" className="brand">
-          <div className="brand-mark">
-            <svg viewBox="0 0 24 24">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-          </div>
-          <span className="brand-name"><em>Oylar</em></span>
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button 
+            className="sidebar-toggle" 
+            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+            aria-label="Toggle sidebar"
+          >
+            ☰
+          </button>
+          <Link to="/main" className="brand">
+            <div className="brand-mark">
+              <svg viewBox="0 0 24 24">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <span className="brand-name"><em>Oylar</em></span>
+          </Link>
+        </div>
         <div className="nav-right">
           <div className="nav-user-chip">
             <span className="nav-username">{user?.name || 'Қолданушы'}</span>
@@ -536,23 +552,53 @@ const DashboardPage = () => {
       <div className="dashboard-layout" style={{ marginTop: '68px' }}>
         <aside className="sidebar">
           <div className="sb-section-label">Жеке кабинет</div>
-          <button className={`sb-item ${activeSection === 'overview' ? 'active' : ''}`} onClick={() => setActiveSection('overview')}>
+          <button className={`sb-item ${activeSection === 'overview' ? 'active' : ''}`} onClick={() => setActiveSectionWithClose('overview')}>
             <span className="sb-icon">🏠</span> Шолу
           </button>
-          <button className={`sb-item ${activeSection === 'account' ? 'active' : ''}`} onClick={() => setActiveSection('account')}>
+          <button className={`sb-item ${activeSection === 'account' ? 'active' : ''}`} onClick={() => setActiveSectionWithClose('account')}>
             <span className="sb-icon">👤</span> Профиль
           </button>
           <div className="sb-divider"></div>
           <div className="sb-section-label">Сауалнамалар</div>
-          <button className={`sb-item ${activeSection === 'create' ? 'active' : ''}`} onClick={() => setActiveSection('create')}>
+          <button className={`sb-item ${activeSection === 'create' ? 'active' : ''}`} onClick={() => setActiveSectionWithClose('create')}>
             <span className="sb-icon">✏️</span> Жасау
           </button>
-          <button className={`sb-item ${activeSection === 'my-surveys' ? 'active' : ''}`} onClick={() => setActiveSection('my-surveys')}>
+          <button className={`sb-item ${activeSection === 'my-surveys' ? 'active' : ''}`} onClick={() => setActiveSectionWithClose('my-surveys')}>
             <span className="sb-icon">📊</span> Менің сауалнамаларым
             <span className="sb-badge">{overviewStats.surveys}</span>
           </button>
           <div className="sb-divider"></div>
-          <Link to="/main" className="sb-item">
+          <Link to="/main" className="sb-item" onClick={() => setMobileSidebarOpen(false)}>
+            <span className="sb-icon">🔍</span> Барлық сауалнамалар
+          </Link>
+        </aside>
+
+        {/* Mobile Sidebar Overlay */}
+        <div 
+          className={`mobile-sidebar-overlay ${mobileSidebarOpen ? 'open' : ''}`}
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+
+        {/* Mobile Sidebar */}
+        <aside className={`mobile-sidebar ${mobileSidebarOpen ? 'open' : ''}`}>
+          <div className="sb-section-label">Жеке кабинет</div>
+          <button className={`sb-item ${activeSection === 'overview' ? 'active' : ''}`} onClick={() => setActiveSectionWithClose('overview')}>
+            <span className="sb-icon">🏠</span> Шолу
+          </button>
+          <button className={`sb-item ${activeSection === 'account' ? 'active' : ''}`} onClick={() => setActiveSectionWithClose('account')}>
+            <span className="sb-icon">👤</span> Профиль
+          </button>
+          <div className="sb-divider"></div>
+          <div className="sb-section-label">Сауалнамалар</div>
+          <button className={`sb-item ${activeSection === 'create' ? 'active' : ''}`} onClick={() => setActiveSectionWithClose('create')}>
+            <span className="sb-icon">✏️</span> Жасау
+          </button>
+          <button className={`sb-item ${activeSection === 'my-surveys' ? 'active' : ''}`} onClick={() => setActiveSectionWithClose('my-surveys')}>
+            <span className="sb-icon">📊</span> Менің сауалнамаларым
+            <span className="sb-badge">{overviewStats.surveys}</span>
+          </button>
+          <div className="sb-divider"></div>
+          <Link to="/main" className="sb-item" onClick={() => setMobileSidebarOpen(false)}>
             <span className="sb-icon">🔍</span> Барлық сауалнамалар
           </Link>
         </aside>
