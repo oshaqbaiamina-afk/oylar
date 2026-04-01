@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { surveysAPI } from '../utils/api'
 import { getUser, isLoggedIn, clearAuth } from '../utils/auth'
 
@@ -21,6 +21,9 @@ const timeAgo = (date) => {
 
 const MainPage = () => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const highlightId = searchParams.get('survey')
+  const highlightRef = useRef(null)
   const user = getUser()
 
   if (!isLoggedIn()) {
@@ -52,8 +55,14 @@ const MainPage = () => {
           surveysAPI.getStats(),
         ])
         if (cancelled) return
-        setSurveys(Array.isArray(surveysData) ? surveysData : [])
+        const list = Array.isArray(surveysData) ? surveysData : []
+        setSurveys(list)
         if (statsData) setStats(statsData)
+        // Auto-open survey from URL param
+        if (highlightId) {
+          const target = list.find(s => String(s.id) === String(highlightId))
+          if (target) setTimeout(() => openSurvey(target), 400)
+        }
       } catch {
         showToast('Мәліметтерді жүктеу сәтсіз', 'error')
       } finally {
@@ -63,6 +72,13 @@ const MainPage = () => {
     load()
     return () => { cancelled = true }
   }, [])
+
+  // Scroll to highlighted card when ref is set
+  useEffect(() => {
+    if (highlightRef.current) {
+      setTimeout(() => highlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 500)
+    }
+  }, [highlightId, surveys])
 
   // useMemo replaces the extra filterAndSortSurveys useEffect + state
   const filteredSurveys = useMemo(() => {
@@ -276,7 +292,16 @@ const MainPage = () => {
             </div>
           ) : (
             filteredSurveys.map(s => (
-              <div key={s.id} className="s-card">
+              <div
+                key={s.id}
+                className="s-card"
+                ref={highlightId && String(s.id) === String(highlightId) ? highlightRef : null}
+                style={highlightId && String(s.id) === String(highlightId) ? {
+                  outline: '3px solid var(--indigo)',
+                  boxShadow: '0 0 0 6px var(--indigo-xl)',
+                  borderRadius: '16px',
+                } : {}}
+              >
                 {s.imageUrl && (
                   <img src={s.imageUrl} alt="Cover" loading="lazy"
                     style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '16px 16px 0 0' }} />

@@ -9,7 +9,30 @@ const PublicPage = () => {
   const loggedIn = isLoggedIn();
   const [stats, setStats] = useState({ users: '1,200', surveys: '8,400', responses: '1,248' });
   const [toast, setToast] = useState({ show: false, msg: '' });
-  
+  const [apiModal, setApiModal] = useState({ open: false, url: '', error: '' });
+
+  // Прокрутка до секции
+  const scrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Обработка вставки ссылки → переход на /main?survey=ID
+  const handleApiLink = () => {
+    const url = apiModal.url.trim();
+    if (!url) return setApiModal(m => ({ ...m, error: 'Сілтемені енгізіңіз' }));
+    let surveyId = null;
+    try {
+      const u = new URL(url, window.location.origin);
+      surveyId = u.searchParams.get('survey') || u.pathname.split('/').filter(Boolean).pop();
+    } catch {
+      surveyId = url.split('/').pop();
+    }
+    if (!surveyId) return setApiModal(m => ({ ...m, error: 'Сілтеме дұрыс емес' }));
+    setApiModal({ open: false, url: '', error: '' });
+    navigate('/main?survey=' + surveyId);
+  };
+
   // Demo Survey State
   const [cur, setCur] = useState(0);
   const [ans, setAns] = useState({});
@@ -54,8 +77,8 @@ const PublicPage = () => {
           <div className="hero-quick">
             <span className="quick-lbl">Жылдам әрекеттер:</span>
             <button className="btn btn-indigo-soft btn-sm" onClick={() => showToast('Шаблон ашылды!')}>📋 Шаблондар</button>
-            <button className="btn btn-indigo-soft btn-sm" onClick={() => showToast('API кілті жіберілді')}>🔗 API қосылу</button>
-            <button className="btn btn-indigo-soft btn-sm" onClick={() => showToast('WhatsApp чаты ашылды')}>💬 Қолдау</button>
+            <button className="btn btn-indigo-soft btn-sm" onClick={() => setApiModal({ open: true, url: '', error: '' })}>🔗 API қосылу</button>
+            <a href="https://t.me/+nxnXTcsfXkQxNTc6" target="_blank" rel="noopener noreferrer" className="btn btn-indigo-soft btn-sm">💬 Қолдау</a>
           </div>
           <div className="hero-trust">
             <div className="trust-faces">
@@ -190,11 +213,10 @@ const PublicPage = () => {
     <div className="feat-card">
       <div className="feat-icon feat-icon-sky">🛡️</div>
       <h3 className="feat-title">Аутентификация</h3>
-      <p className="feat-desc">JWT токен, парольді шифрлау, рөлдер жүйесі (admin/user). Деректеріңіз қорғалған.</p>
+      <p className="feat-desc">JWT токен, парольді шифрлау. Деректеріңіз қорғалған.</p>
       <div className="feat-tags">
         <span className="tag">JWT</span>
         <span className="tag">bcrypt</span>
-        <span className="tag">Рөлдер</span>
       </div>
     </div>
 
@@ -213,11 +235,11 @@ const PublicPage = () => {
     <div className="feat-card">
       <div className="feat-icon feat-icon-slate">📤</div>
       <h3 className="feat-title">Экспорт</h3>
-      <p className="feat-desc">Нәтижелерді Excel, CSV немесе PDF форматында жүктеп алыңыз. API арқылы интеграция.</p>
+      <p className="feat-desc">Нәтижелерді Excel, CSV немесе PDF форматында жүктеп алыңыз.</p>
       <div className="feat-tags">
         <span className="tag">Excel</span>
         <span className="tag">CSV</span>
-        <span className="tag">REST API</span>
+        <span className="tag">PDF</span>
       </div>
     </div>
   </div>
@@ -308,16 +330,30 @@ const PublicPage = () => {
             <div className="footer-brand-name"><em>Oylar</em></div>
             <p className="footer-tagline">Қазақстандық бизнес пен студенттерге арналған онлайн сауалнама платформасы.</p>
           </div>
-          {['Платформа', 'Компания', 'Анықтама'].map(col => (
-            <div key={col}>
-              <div className="footer-col-title">{col}</div>
-              <div className="footer-links">
-                <span className="footer-link">Мүмкіндіктер</span>
-                <span className="footer-link">Біз туралы</span>
-                <span className="footer-link">Қолдау</span>
-              </div>
+          <div>
+            <div className="footer-col-title">Платформа</div>
+            <div className="footer-links">
+              <button className="footer-link" style={{background:'none',border:'none',cursor:'pointer',padding:0,font:'inherit'}} onClick={() => scrollTo('features')}>Мүмкіндіктер</button>
+              <button className="footer-link" style={{background:'none',border:'none',cursor:'pointer',padding:0,font:'inherit'}} onClick={() => scrollTo('how')}>Қалай жұмыс істейді</button>
+              <a href="https://t.me/+nxnXTcsfXkQxNTc6" target="_blank" rel="noopener noreferrer" className="footer-link">Қолдау</a>
             </div>
-          ))}
+          </div>
+          <div>
+            <div className="footer-col-title">Компания</div>
+            <div className="footer-links">
+              <button className="footer-link" style={{background:'none',border:'none',cursor:'pointer',padding:0,font:'inherit'}} onClick={() => scrollTo('how')}>Біз туралы</button>
+              <button className="footer-link" style={{background:'none',border:'none',cursor:'pointer',padding:0,font:'inherit'}} onClick={() => scrollTo('features')}>Мүмкіндіктер</button>
+              <a href="https://t.me/+nxnXTcsfXkQxNTc6" target="_blank" rel="noopener noreferrer" className="footer-link">Қолдау</a>
+            </div>
+          </div>
+          <div>
+            <div className="footer-col-title">Анықтама</div>
+            <div className="footer-links">
+              <button className="footer-link" style={{background:'none',border:'none',cursor:'pointer',padding:0,font:'inherit'}} onClick={() => scrollTo('features')}>Мүмкіндіктер</button>
+              <button className="footer-link" style={{background:'none',border:'none',cursor:'pointer',padding:0,font:'inherit'}} onClick={() => scrollTo('demo')}>Демо</button>
+              <a href="https://t.me/+nxnXTcsfXkQxNTc6" target="_blank" rel="noopener noreferrer" className="footer-link">Қолдау</a>
+            </div>
+          </div>
         </div>
         <div className="footer-bottom container">
           <div className="footer-copy">© 2026 Oylar. Барлық құқықтар қорғалған.</div>
@@ -329,6 +365,41 @@ const PublicPage = () => {
 
       {/* TOAST */}
       <div className={`toast ${toast.show ? 'show' : ''}`}>{toast.msg}</div>
+
+      {/* API LINK MODAL */}
+      {apiModal.open && (
+        <div style={{
+          position:'fixed',inset:0,background:'rgba(15,23,42,.55)',zIndex:1000,
+          display:'flex',alignItems:'center',justifyContent:'center'
+        }} onClick={(e) => e.target===e.currentTarget && setApiModal({open:false,url:'',error:''})}>
+          <div style={{
+            background:'#fff',borderRadius:'20px',padding:'2rem',width:'100%',maxWidth:'440px',
+            boxShadow:'0 20px 60px rgba(0,0,0,.18)'
+          }}>
+            <div style={{fontWeight:800,fontSize:'18px',marginBottom:'.5rem'}}>🔗 Сауалнама сілтемесі</div>
+            <p style={{fontSize:'14px',color:'var(--slate-600)',marginBottom:'1.25rem'}}>
+              Сауалнама сілтемесін немесе ID-ін қойыңыз — автоматты түрде ашылады
+            </p>
+            <input
+              className="input"
+              placeholder="https://... немесе сауалнама ID"
+              value={apiModal.url}
+              autoFocus
+              onChange={(e) => setApiModal(m => ({ ...m, url: e.target.value, error: '' }))}
+              onKeyDown={(e) => e.key === 'Enter' && handleApiLink()}
+              style={{marginBottom: apiModal.error ? '8px' : '1.25rem'}}
+            />
+            {apiModal.error && (
+              <div style={{color:'var(--rose)',fontSize:'13px',marginBottom:'1rem'}}>⚠ {apiModal.error}</div>
+            )}
+            <div style={{display:'flex',gap:'10px',justifyContent:'flex-end'}}>
+              <button className="btn btn-ghost btn-sm"
+                onClick={() => setApiModal({open:false,url:'',error:''})}>Болдырмау</button>
+              <button className="btn btn-primary btn-sm" onClick={handleApiLink}>Өту →</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
