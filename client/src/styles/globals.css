@@ -55,7 +55,6 @@ transition: .18s;
 
 .btn-primary { background: var(--indigo); color: #fff; }
 .btn-primary:hover { background: var(--indigo-d); }
-
 .btn-ghost {
 background: transparent;
 border: 1.5px solid var(--slate-300);
