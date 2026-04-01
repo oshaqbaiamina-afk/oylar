@@ -4,7 +4,7 @@ import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// ─── GET /api/surveys/stats ─── (ВАЖНО: до /:id!)
+// ─── GET /api/surveys/stats ─── (МАҢЫЗДЫ: /:id жолынан бұрын болуы керек!)
 router.get('/stats', async (req, res) => {
   try {
     const [usersRes, surveysRes, responsesRes] = await Promise.all([
@@ -25,7 +25,7 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-// ─── GET /api/surveys/my ─── (ВАЖНО: до /:id!)
+// ─── GET /api/surveys/my ─── (МАҢЫЗДЫ: /:id жолынан бұрын болуы керек!)
 router.get('/my', authMiddleware, async (req, res) => {
   try {
     const result = await query(
@@ -44,10 +44,10 @@ router.get('/my', authMiddleware, async (req, res) => {
 });
 
 // ─── GET /api/surveys ───────────────────────────────────────
-// dashboard.html /surveys?user=me деп шақырады → /surveys/my-ге redirect немесе тікелей өңдеу
+// dashboard.html /surveys?user=me деп шақырады → /surveys/my-ге бағыттайды немесе тікелей өңдейді
 router.get('/', async (req, res) => {
   try {
-    // БАГ 4 ТҮЗЕТУ: ?user=me болса → авторизациямен менің сауалнамаларым
+    // ТҮЗЕТУ: ?user=me болса → авторизациямен менің сауалнамаларым
     if (req.query.user === 'me') {
       const token = req.headers.authorization?.split(' ')[1];
       if (!token) return res.status(401).json({ success: false, message: 'Токен жоқ' });
@@ -68,8 +68,8 @@ router.get('/', async (req, res) => {
 
     // Барлық белсенді сауалнамалар
     const result = await query(
-      `SELECT s.id, s.title, s.description, s."isPublished", s."createdAt",
-              u.name as author_name, u."avatarUrl" as author_avatar,
+      `SELECT s.id, s.title, s.description, s."isPublished", s."createdAt", s."imageUrl",
+              u.name as author_name,
               (SELECT COUNT(*) FROM "Responses" r WHERE r."surveyId" = s.id)::int as response_count
        FROM "Surveys" s
        LEFT JOIN "Users" u ON s."userId" = u.id
@@ -87,7 +87,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const result = await query(
-      `SELECT s.*, u.name as author_name, u."avatarUrl" as author_avatar,
+      `SELECT s.*, u.name as author_name,
               (SELECT COUNT(*) FROM "Responses" r WHERE r."surveyId" = s.id)::int as response_count
        FROM "Surveys" s
        LEFT JOIN "Users" u ON s."userId" = u.id
@@ -137,12 +137,12 @@ router.get('/:id/results', authMiddleware, async (req, res) => {
     const analyzedQuestions = questions.map((q, qIdx) => {
       const allAnswers = responses.map((r, rIdx) => {
         let ans = r.answers;
-        // Postgres jsonb might already parse it, but if it was double-stringified on insert, we parse it.
+        // Postgres jsonb деректерін автоматты парсингтейді, бірақ қос жолға түрленген болса, қолмен парсингтейміз.
         while (typeof ans === 'string') { 
           try { ans = JSON.parse(ans); } catch { break; } 
         }
         if (Array.isArray(ans)) {
-          // Safely check a && a.questionIndex since old/invalid answers might have nulls or be primitives
+          // a && a.questionIndex мәнін қауіпсіз тексеру — ескі/жарамсыз жауаптар null немесе примитив болуы мүмкін
           const found = ans.find(a => a && typeof a === 'object' && a.questionIndex === qIdx);
           return found ? found.answer : undefined;
         }
@@ -185,15 +185,15 @@ router.get('/:id/results', authMiddleware, async (req, res) => {
 // ─── POST /api/surveys ─────────────────────────────────────
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { title, description, questions, is_active = true } = req.body;
+    const { title, description, questions, is_active = true, imageUrl } = req.body;
     if (!title?.trim()) return res.status(400).json({ success: false, message: 'Атауы міндетті' });
     if (!questions || !Array.isArray(questions) || questions.length === 0)
       return res.status(400).json({ success: false, message: 'Кемінде 1 сұрақ қажет' });
 
     const result = await query(
-      `INSERT INTO "Surveys" ("title", "description", "questions", "userId", "isPublished", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) RETURNING *`,
-      [title.trim(), description?.trim() || '', JSON.stringify(questions), req.user.id, is_active]
+      `INSERT INTO "Surveys" ("title", "description", "questions", "userId", "isPublished", "imageUrl", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) RETURNING *`,
+      [title.trim(), description?.trim() || '', JSON.stringify(questions), req.user.id, is_active, imageUrl || null]
     );
     res.status(201).json({ success: true, data: result.rows[0], message: 'Сауалнама жасалды' });
   } catch (err) {
@@ -205,7 +205,7 @@ router.post('/', authMiddleware, async (req, res) => {
 // ─── PUT /api/surveys/:id ──────────────────────────────────
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
-    const { title, description, questions, is_active } = req.body;
+    const { title, description, questions, is_active, imageUrl } = req.body;
     const check = await query('SELECT "userId" FROM "Surveys" WHERE id = $1', [req.params.id]);
     if (check.rows.length === 0) return res.status(404).json({ success: false, message: 'Сауалнама табылмады' });
     if (check.rows[0].userId !== req.user.id) return res.status(403).json({ success: false, message: 'Рұқсат жоқ' });
@@ -216,8 +216,9 @@ router.put('/:id', authMiddleware, async (req, res) => {
     if (description !== undefined) { fields.push(`description = $${i++}`); values.push(description); }
     if (questions !== undefined)   { fields.push(`questions = $${i++}`);   values.push(JSON.stringify(questions)); }
     if (is_active !== undefined)   { fields.push(`"isPublished" = $${i++}`);   values.push(is_active); }
+    if (imageUrl !== undefined)    { fields.push(`"imageUrl" = $${i++}`);      values.push(imageUrl); }
     
-    // Always update updatedAt when modifying
+    // Өзгертілген кезде updatedAt мәнін әрқашан жаңарту
     fields.push(`"updatedAt" = $${i++}`);
     values.push(new Date());
 

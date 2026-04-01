@@ -430,8 +430,8 @@ a{text-decoration:none;color:inherit}
     <div class="feat-card">
       <div class="feat-icon feat-icon-indigo">📝</div>
       <div class="feat-title">Сауалнама редакторы</div>
-      <div class="feat-desc">Drag & drop интерфейсімен сұрақтар қосыңыз. 6 түрлі сұрақ форматы бар.</div>
-      <div class="feat-tags"><span class="tag">Drag & drop</span><span class="tag">6 формат</span></div>
+      <div class="feat-desc">Drag & drop интерфейсімен сұрақтар қосыңыз. 4 түрлі сұрақ форматы бар.</div>
+      <div class="feat-tags"><span class="tag">Drag & drop</span><span class="tag">4 формат</span></div>
     </div>
     <div class="feat-card">
       <div class="feat-icon feat-icon-amber">📊</div>
@@ -617,7 +617,6 @@ a{text-decoration:none;color:inherit}
       <div class="footer-col-title">Анықтама</div>
       <div class="footer-links">
         <a class="footer-link" href="#">Нұсқаулық</div>
-        <a class="footer-link" href="#">FAQ</a>
         <a class="footer-link" href="#">Қолдау</a>
         <a class="footer-link" href="#">Жаңалықтар</a>
       </div>
@@ -710,16 +709,19 @@ fetch('/api/surveys/stats')
   .catch(()=>{});
 
 // Navbar auth state
+const COLORS = ['#4F46E5','#F59E0B','#10B981','#F43F5E','#0EA5E9','#8B5CF6'];
+function colorFor(str) { let h = 0; for (const c of (str||'')) h = (h * 31 + c.charCodeAt(0)) % COLORS.length; return COLORS[h]; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 const userStr=localStorage.getItem('user');
 const user=userStr&&userStr!=='undefined'&&userStr!=='null'?JSON.parse(userStr):null;
 if(user){
-  const nr=document.getElementById('nav-right');
-  const av=user.avatarUrl
-    ?`<img src="${user.avatarUrl}" style="width:28px;height:28px;border-radius:50%;object-fit:cover">`
-    :`<div style="width:28px;height:28px;border-radius:50%;background:var(--indigo);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">${user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>`;
-  nr.innerHTML=`
-    <a href="/dashboard.html" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:7px">${av} Жеке кабинет</a>
-    <button class="btn btn-ghost btn-sm" onclick="localStorage.removeItem('user');location.reload()">Шығу</button>`;
+  const nr=document.getElementById('nav-right') || document.querySelector('.nav-right');
+  if(nr) {
+    nr.innerHTML=`
+      <a href="/dashboard.html" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:7px">👤 Жеке кабинет</a>
+      <button class="btn btn-ghost btn-sm" onclick="localStorage.removeItem('user');location.reload()">Шығу</button>`;
+  }
 }
 </script>
 </body>

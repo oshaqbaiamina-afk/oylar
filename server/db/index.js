@@ -10,7 +10,7 @@ const pool = new Pool({
   port:     parseInt(process.env.DB_PORT) || 5432,
   database: process.env.DB_NAME     || 'oylar',
   user:     process.env.DB_USER     || 'postgres',
-  password: process.env.DB_PASSWORD,  // только из .env, нет дефолта!
+  password: process.env.DB_PASSWORD,  // тек .env файлынан алынады, әдепкі мән жоқ!
 });
 
 pool.connect((err, client, release) => {

@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Сауалнама табылмады немесе жабық' });
     }
 
-    // Get userId if authenticated, otherwise null
+    // Аутентификацияланған болса userId алу, болмаса null
     const userId = req.user?.id || null;
 
     const result = await query(

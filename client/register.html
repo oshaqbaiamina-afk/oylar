@@ -205,7 +205,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--white
 
     <div class="page-label">Бастау</div>
     <h1 class="page-title">Тіркелу</h1>
-    <p class="page-sub">Тегін аккаунт жасаңыз және өз опросыңызды бүгін жариялаңыз.</p>
+    <p class="page-sub">Тегін аккаунт жасаңыз және өз сауалнамаңызды бүгін жариялаңыз.</p>
 
     <!-- Google OAuth -->
     <button class="btn btn-google btn-lg" onclick="handleGoogleAuth()">
@@ -325,7 +325,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--white
       <div class="benefit-card">
         <div class="benefit-icon bi-indigo">📊</div>
         <div class="benefit-info">
-          <div class="benefit-name">Шексіз опростар жасаңыз</div>
+          <div class="benefit-name">Шексіз сауалнамалар жасаңыз</div>
           <div class="benefit-desc">Кез келген тақырыпта сауалнама құрастырыңыз</div>
         </div>
       </div>
@@ -341,7 +341,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--white
       <div class="benefit-card">
         <div class="benefit-icon bi-amber">🔗</div>
         <div class="benefit-info">
-          <div class="benefit-name">Опросты оңай бөлісіңіз</div>
+          <div class="benefit-name">Сауалнаманы оңай бөлісіңіз</div>
           <div class="benefit-desc">Бір сілтеме арқылы кез келген адамға жіберіңіз</div>
         </div>
       </div>
@@ -361,7 +361,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--white
         </div>
         <div class="mini-stat">
           <div class="mini-stat-n">8.5K+</div>
-          <div class="mini-stat-l">Опрос</div>
+          <div class="mini-stat-l">Сауалнама</div>
         </div>
         <div class="mini-stat">
           <div class="mini-stat-n">42K+</div>
@@ -495,7 +495,7 @@ async function handleSubmit(e) {
       throw new Error(data.message || 'Тіркелу қатесі');
     }
 
-    // Сохраняем токен и пользователя
+    // Токен мен пайдаланушы мәліметін сақтаймыз
     localStorage.setItem('token', data.data.token);
     localStorage.setItem('user', JSON.stringify(data.data.user));
 
@@ -508,14 +508,14 @@ async function handleSubmit(e) {
     btn.innerHTML = 'Тіркелу — Тегін 🚀';
     showToast(err.message || 'Қате орын алды', 'error');
 
-    // Если email уже занят
+    // Email бос болмаса
     if (err.message && err.message.toLowerCase().includes('email')) {
       showErr('email', 'Бұл email тіркелген');
     }
   }
 }
 
-// ─── GOOGLE AUTH (заглушка) ───
+// ─── GOOGLE АВТОРИЗАЦИЯ (әзірге жұмыс жоқ) ───
 function handleGoogleAuth() {
   showToast('Google OAuth жақында қосылады 🔜');
 }

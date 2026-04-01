@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query } from '../db/index.js';
 import authMiddleware from '../middleware/authMiddleware.js';
-import { uploadAvatar } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -98,7 +97,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '30d' }
     );
 
-    // Парольді алып тастап user қайтару
+    // Құпия сөзді алып тастап пайдаланушыны қайтару
     const { password: _pw, ...userWithoutPassword } = user;
 
     return res.json({
@@ -117,7 +116,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const result = await query(
-      `SELECT id, name, email, "avatarUrl", bio, "createdAt"
+      `SELECT id, name, email, bio, "createdAt"
        FROM "Users" WHERE id = $1`,
       [req.user.id]
     );
@@ -134,17 +133,17 @@ router.get('/me', authMiddleware, async (req, res) => {
 // ─── PUT /api/auth/profile ─── Профиль жаңарту (PUT + PATCH екеуі де жұмыс істейді)
 const updateProfile = async (req, res) => {
   try {
-    const { name, bio, avatarUrl } = req.body;
+    const { name, bio } = req.body;
     if (!name?.trim()) {
       return res.status(400).json({ success: false, message: 'Аты міндетті' });
     }
 
     const result = await query(
       `UPDATE "Users"
-       SET name = $1, bio = $2, "avatarUrl" = $3
-       WHERE id = $4
-       RETURNING id, name, email, bio, "avatarUrl", "createdAt"`,
-      [name.trim(), bio?.trim() || null, avatarUrl || null, req.user.id]
+       SET name = $1, bio = $2
+       WHERE id = $3
+       RETURNING id, name, email, bio, "createdAt"`,
+      [name.trim(), bio?.trim() || null, req.user.id]
     );
 
     return res.json({
@@ -160,38 +159,7 @@ const updateProfile = async (req, res) => {
 router.put('/profile',   authMiddleware, updateProfile);
 router.patch('/profile', authMiddleware, updateProfile);
 
-// ─── POST /api/auth/avatar ── Base64 in DB (no disk, no proxy issues)
-router.post('/avatar', authMiddleware, async (req, res) => {
-  try {
-    const { avatar } = req.body; // base64 data URL: "data:image/jpeg;base64,..."
-    if (!avatar) {
-      return res.status(400).json({ success: false, message: 'Сурет деректері жоқ' });
-    }
-    // Basic validation — must be a data URL
-    if (!avatar.startsWith('data:image/')) {
-      return res.status(400).json({ success: false, message: 'Жарамды сурет форматы емес' });
-    }
-    // Limit size: ~5MB base64 ≈ ~3.75MB actual
-    if (avatar.length > 7 * 1024 * 1024) {
-      return res.status(400).json({ success: false, message: 'Сурет өлшемі тым үлкен (макс. 5MB)' });
-    }
 
-    const result = await query(
-      `UPDATE "Users" SET "avatarUrl" = $1, "updatedAt" = NOW()
-       WHERE id = $2
-       RETURNING id, name, email, bio, "avatarUrl", "createdAt"`,
-      [avatar, req.user.id]
-    );
-    return res.json({
-      success: true,
-      data: result.rows[0],
-      message: 'Аватар сәтті жаңартылды'
-    });
-  } catch (err) {
-    console.error('Avatar DB error:', err);
-    return res.status(500).json({ success: false, message: 'Дерекқор қатесі' });
-  }
-});
 
 
 // ─── POST /api/auth/change-password ────────────────────────
@@ -200,23 +168,23 @@ router.post('/change-password', authMiddleware, async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
     if (!oldPassword || !newPassword) {
-      return res.status(400).json({ success: false, message: 'Екі парольді де енгізіңіз' });
+      return res.status(400).json({ success: false, message: 'Екі құпия сөзді де енгізіңіз' });
     }
     if (newPassword.length < 8) {
-      return res.status(400).json({ success: false, message: 'Жаңа пароль кемінде 8 символ' });
+      return res.status(400).json({ success: false, message: 'Жаңа құпия сөз кемінде 8 символ болуы керек' });
     }
 
     const result = await query('SELECT password FROM "Users" WHERE id = $1', [req.user.id]);
     const isMatch = await bcrypt.compare(oldPassword, result.rows[0].password);
     if (!isMatch) {
-      return res.status(400).json({ success: false, message: 'Ағымдағы пароль дұрыс емес' });
+      return res.status(400).json({ success: false, message: 'Ағымдағы құпия сөз дұрыс емес' });
     }
 
     const salt = await bcrypt.genSalt(10);
     const newHash = await bcrypt.hash(newPassword, salt);
     await query('UPDATE "Users" SET password = $1 WHERE id = $2', [newHash, req.user.id]);
 
-    return res.json({ success: true, message: 'Пароль сәтті өзгертілді' });
+    return res.json({ success: true, message: 'Құпия сөз сәтті өзгертілді' });
   } catch (err) {
     console.error('Change password error:', err);
     return res.status(500).json({ success: false, message: 'Сервер қатесі' });

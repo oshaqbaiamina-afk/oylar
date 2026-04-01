@@ -43,9 +43,8 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--slate
 .brand-name{font-size:20px;font-weight:800;color:var(--slate);letter-spacing:-.5px}
 .brand-name em{color:var(--indigo);font-style:normal}
 .nav-right{display:flex;gap:8px;align-items:center}
-.nav-user-chip{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:10px;background:var(--slate-50);border:1.5px solid var(--slate-100);cursor:pointer;transition:all .15s;text-decoration:none}
+.nav-user-chip{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:10px;background:var(--slate-50);border:1.5px solid var(--slate-100);cursor:pointer;transition:all .15s;text-decoration:none}
 .nav-user-chip:hover{background:var(--slate-100);border-color:var(--slate-200)}
-.nav-avatar{width:28px;height:28px;border-radius:8px;background:var(--indigo);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
 .nav-username{font-size:13px;font-weight:600;color:var(--slate-600)}
 
 /* ─── HERO HEADER ─── */
@@ -242,7 +241,6 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--slate
   </a>
   <div class="nav-right">
     <a href="dashboard.html" class="nav-user-chip" id="nav-user-chip">
-      <div class="nav-avatar" id="nav-av">?</div>
       <span class="nav-username" id="nav-username">Профиль</span>
     </a>
     <button class="btn btn-ghost btn-sm" onclick="logout()">Шығу</button>
@@ -319,6 +317,12 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--slate
 <div class="toast" id="toast"></div>
 
 <script>
+// ─── HELPERS ────────────────────────────────────────────
+const COLORS = ['#4F46E5','#F59E0B','#10B981','#F43F5E','#0EA5E9','#8B5CF6'];
+function colorFor(str) { let h = 0; for (const c of (str||'')) h = (h * 31 + c.charCodeAt(0)) % COLORS.length; return COLORS[h]; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escVal(s) { return String(s||'').replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
+
 // ─── AUTH ───────────────────────────────────────────────
 const TOKEN = localStorage.getItem('token');
 const USER  = (() => { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } })();
@@ -326,9 +330,7 @@ const USER  = (() => { try { return JSON.parse(localStorage.getItem('user')); } 
 if (!TOKEN || !USER) { window.location.href = 'login.html'; }
 
 // Nav user
-const initials = (USER?.name || 'U').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-document.getElementById('nav-av').textContent = initials;
-document.getElementById('nav-username').textContent = USER?.name || '';
+document.getElementById('nav-username').textContent = USER?.name || 'Профиль';
 
 function logout() {
   localStorage.clear();
@@ -356,10 +358,6 @@ let filteredSurveys = [];
 let currentFilter = 'all';
 let currentSurvey = null;
 let answers = {};
-
-// ─── AVATAR COLORS ──────────────────────────────────────
-const COLORS = ['#4F46E5','#F59E0B','#10B981','#F43F5E','#0EA5E9','#8B5CF6'];
-function colorFor(str) { let h = 0; for (const c of (str||'')) h = (h * 31 + c.charCodeAt(0)) % COLORS.length; return COLORS[h]; }
 
 // ─── LOAD SURVEYS ───────────────────────────────────────
 async function loadSurveys() {
@@ -442,15 +440,12 @@ function renderSurveys(list) {
   }
 
   el.innerHTML = list.map(s => {
-    const init = (s.author_name || 'A').slice(0,2).toUpperCase();
-    const color = colorFor(s.author_name || '');
     const ago = timeAgo(s.created_at);
     const count = s.response_count || 0;
-    const authorAvHtml = s.author_avatar
-      ? `<img src="${s.author_avatar}" alt="${esc(s.author_name||'')}" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`
-      : init;
+    const coverHTML = s.imageUrl ? `<img src="${s.imageUrl}" style="width:100%;height:160px;object-fit:cover;border-radius:16px 16px 0 0;flex-shrink:0" alt="Cover">` : '';
     return `
       <div class="s-card">
+        ${coverHTML}
         <div class="s-card-top">
           <div class="s-meta">
             <span class="s-category">${esc(s.category || 'Сауалнама')}</span>
@@ -461,9 +456,8 @@ function renderSurveys(list) {
         <div class="s-card-body">
           <div class="s-desc">${esc(s.description || 'Сипаттама жоқ')}</div>
           <div class="s-info-row">
-            <div class="s-author">
-              <div class="s-author-av" style="background:${s.author_avatar ? 'transparent' : color}">${authorAvHtml}</div>
-              <span class="s-author-name">${esc(s.author_name || 'Аноним')}</span>
+            <div class="s-author" style="gap:8px">
+              <span class="s-author-name">👤 ${esc(s.author_name || 'Аноним')}</span>
             </div>
             <span class="s-time">${ago}</span>
           </div>
@@ -517,8 +511,10 @@ function renderViewer() {
   const total = questions.length;
   const pct = total ? Math.round((answeredCount / total) * 100) : 0;
 
+  const coverHTML = s.imageUrl ? `<img src="${s.imageUrl}" style="width:100%;height:180px;object-fit:cover;flex-shrink:0" alt="Cover">` : '';
   let html = `
-    <div class="viewer-header">
+    ${coverHTML}
+    <div class="viewer-header" ${s.imageUrl ? 'style="border-radius:0"' : ''}>
       <div class="viewer-badge">🗳️ Сауалнама</div>
       <div class="viewer-title">${esc(s.title)}</div>
       ${s.description ? `<div class="viewer-desc">${esc(s.description)}</div>` : ''}
@@ -673,9 +669,7 @@ function showSuccessView() {
     </div>`;
 }
 
-// ─── HELPERS ────────────────────────────────────────────
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function escVal(s) { return String(s||'').replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
+// ─── DATE HELPERS ───────────────────────────────────────
 
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -727,18 +721,16 @@ function renderComments(comments) {
   }
   
   list.innerHTML = comments.map(c => {
-    const init = (c.author_name || 'A').slice(0,2).toUpperCase();
-    const color = colorFor(c.author_name || '');
     const ago = timeAgo(c.createdAt);
-    const avHtml = c.author_avatar
-      ? `<img src="${c.author_avatar}" alt="${esc(c.author_name||'')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-      : init;
+    const nameStr = c.author_name || 'Аноним';
+    const init = nameStr.slice(0, 2).toUpperCase();
+    const color = colorFor(nameStr);
     return `
       <div class="comment-item">
-        <div class="comment-avatar" style="background:${c.author_avatar ? 'transparent' : color};overflow:hidden">${avHtml}</div>
+        <div style="width:36px;height:36px;border-radius:50%;background:${color};color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0">${init}</div>
         <div class="comment-content">
           <div class="comment-header">
-            <span class="comment-author">${esc(c.author_name || 'Аноним')}</span>
+            <span class="comment-author">${esc(nameStr)}</span>
             <span class="comment-time">${ago}</span>
           </div>
           <div class="comment-text">${esc(c.text)}</div>

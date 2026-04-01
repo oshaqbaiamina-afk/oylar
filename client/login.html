@@ -341,7 +341,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--white
         </div>
         <div class="mini-stat">
           <div class="mini-stat-n" id="stat-surveys">8.5K+</div>
-          <div class="mini-stat-l">Опрос</div>
+          <div class="mini-stat-l">Сауалнама</div>
         </div>
         <div class="mini-stat">
           <div class="mini-stat-n" id="stat-responses">42K+</div>
@@ -414,10 +414,9 @@ function showToast(msg, type = 'success') {
   setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-// ─── SUBMIT ───
+// ─── ЖІБЕРУ ───
 // ══════════════════════════════════════════════════════════
-// БАГ 3 ТҮЗЕТУ — login.html-дегі handleSubmit функциясы
-// Осы кодты login.html-дегі handleSubmit-тің орнына қойыңыз
+// ТҮЗЕТУ — login.html-дегі handleSubmit функциясы
 // ══════════════════════════════════════════════════════════
 
 async function handleSubmit(e) {
@@ -447,7 +446,7 @@ async function handleSubmit(e) {
       throw new Error(json.error || json.message || 'Кіру қатесі');
     }
 
-    // ✅ БАГ 3 ТҮЗЕТУ:
+    // ✅ ТҮЗЕТУ:
     // Сервер { success: true, data: { user, token } } қайтарады
     // Сондықтан json.data.token және json.data.user болуы керек
     const token = json.data?.token || json.token;  // екі форматты да қолдайды
@@ -470,21 +469,21 @@ async function handleSubmit(e) {
     if (msg.includes('табылмады') || msg.includes('email')) {
       showErr('email', 'Бұл email тіркелмеген');
       showToast('Email табылмады', 'error');
-    } else if (msg.includes('пароль') || msg.includes('Дұрыс емес')) {
+    } else if (msg.includes('құпия сөз') || msg.includes('Дұрыс емес')) {
       showErr('password', 'Құпия сөз дұрыс емес');
-      showToast('Пароль дұрыс емес', 'error');
+      showToast('Құпия сөз дұрыс емес', 'error');
     } else {
       showToast(msg || 'Кіру мүмкін болмады', 'error');
     }
   }
 }
 
-// ─── GOOGLE AUTH (заглушка) ───
+// ─── GOOGLE АВТОРИЗАЦИЯ (әзірге жұмыс жоқ) ───
 function handleGoogleAuth() {
   showToast('Google OAuth жақында қосылады 🔜');
 }
 
-// ─── REMEMBER ME visual sync ───
+// ─── ЕСТЕ САҚТА — визуалды синхрондау ───
 document.getElementById('remember').addEventListener('change', function() {
   const box = document.getElementById('rememberBox');
   if (this.checked) {
@@ -498,12 +497,12 @@ document.getElementById('remember').addEventListener('change', function() {
   }
 });
 
-// ─── Enter key shortcut ───
+// ─── Enter пернесі арқылы ауысу ───
 document.getElementById('email').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') document.getElementById('password').focus();
 });
 
-// ─── Fetch stats ───
+// ─── Статистиканы жүктеу ───
 fetch('/api/surveys/stats')
   .then(r => r.json())
   .then(s => {
@@ -513,7 +512,7 @@ fetch('/api/surveys/stats')
   })
   .catch(() => {});
 
-// ─── Redirect if already logged in ───
+// ─── Егер кірген болса, бағыттап жіберу ───
 const token = localStorage.getItem('token');
 if (token) {
   fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })

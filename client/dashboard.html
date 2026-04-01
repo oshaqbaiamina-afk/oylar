@@ -50,9 +50,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--slate
 .brand-name{font-size:19px;font-weight:800;color:var(--slate);letter-spacing:-.5px}
 .brand-name em{color:var(--indigo);font-style:normal}
 .nav-right{display:flex;gap:8px;align-items:center}
-.nav-user{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 8px;border-radius:10px;background:var(--slate-50);border:1.5px solid var(--slate-100);cursor:default}
-.nav-avatar{width:28px;height:28px;border-radius:8px;background:var(--indigo);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;overflow:hidden;flex-shrink:0}
-.nav-avatar img{width:100%;height:100%;object-fit:cover}
+.nav-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:var(--slate-50);border:1.5px solid var(--slate-100);cursor:default}
 .nav-uname{font-size:13px;font-weight:600;color:var(--slate-700)}
 
 /* ─── LAYOUT ─── */
@@ -95,11 +93,6 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--slate
 /* ─── ACCOUNT SECTION ─── */
 .profile-card{background:var(--white);border:1.5px solid var(--slate-100);border-radius:var(--radius-lg);padding:2.5rem;margin-bottom:1.5rem}
 .profile-top{display:flex;align-items:flex-start;gap:2rem;margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--slate-100)}
-.avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
-.avatar-big{width:100px;height:100px;border-radius:20px;background:var(--indigo-l);color:var(--indigo);display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;overflow:hidden;border:3px solid var(--white);box-shadow:var(--shadow)}
-.avatar-big img{width:100%;height:100%;object-fit:cover}
-.avatar-change-btn{font-size:12px;font-weight:700;color:var(--indigo);background:var(--indigo-l);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;transition:all .15s}
-.avatar-change-btn:hover{background:var(--indigo-xl)}
 .profile-info{flex:1;display:flex;flex-direction:column;gap:12px}
 
 .profile-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
@@ -282,7 +275,6 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--slate
   </a>
   <div class="nav-right">
     <div class="nav-user">
-      <div class="nav-avatar" id="navAv">?</div>
       <span class="nav-uname" id="navName">...</span>
     </div>
     <button class="btn btn-ghost btn-sm" onclick="logout()">Шығу</button>
@@ -307,7 +299,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--slate
       <span class="sb-icon">✏️</span> Жасау
     </a>
     <a href="#" class="sb-item" data-sec="my-surveys" onclick="nav(event,'my-surveys')">
-      <span class="sb-icon">📊</span> Менікілер
+      <span class="sb-icon">📊</span> Менің сауалнамаларым
       <span class="sb-badge" id="surveysBadge">0</span>
     </a>
     <div class="sb-divider"></div>
@@ -366,11 +358,6 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--slate
 
         <div class="profile-card">
           <div class="profile-top">
-            <div class="avatar-wrap">
-              <div class="avatar-big" id="avatarBig">?</div>
-              <button class="avatar-change-btn" onclick="document.getElementById('avatarFile').click()">📷 Өзгерту</button>
-              <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="handleAvatarChange(event)">
-            </div>
             <div class="profile-info">
               <div class="form-row">
                 <div class="field">
@@ -394,11 +381,6 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--slate
             </div>
           </div>
 
-          <div class="profile-stats-row">
-            <div class="pstat"><div class="pstat-n" id="ps-surveys">0</div><div class="pstat-l">Сауалнама</div></div>
-            <div class="pstat"><div class="pstat-n" id="ps-responses">0</div><div class="pstat-l">Жауап алынды</div></div>
-            <div class="pstat"><div class="pstat-n" id="ps-days">0</div><div class="pstat-l">Күн бері</div></div>
-          </div>
 
           <div class="profile-actions">
             <button class="btn btn-ghost" onclick="loadProfile()">↺ Болдырмау</button>
@@ -484,6 +466,33 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--slate
             <div class="field">
               <label class="label">Сипаттамасы</label>
               <textarea class="textarea" id="surveyDesc" placeholder="Қысқаша сипаттама (міндетті емес)"></textarea>
+            </div>
+            <div class="field">
+              <label class="label">🖼️ Сауалнама мұқабасы (міндетті емес)</label>
+              <!-- Браузердің орысша file input-ін жасырып, қазақша custom зона жасаймыз -->
+              <input type="file" id="surveyImage" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleSurveyImageChange(event)">
+              <div id="surveyImageDropZone"
+                onclick="document.getElementById('surveyImage').click()"
+                style="
+                  display:flex;align-items:center;gap:14px;
+                  padding:14px 18px;
+                  border:2px dashed var(--slate-300);
+                  border-radius:12px;
+                  background:var(--slate-50);
+                  cursor:pointer;
+                  transition:all .2s;
+                "
+                onmouseenter="this.style.borderColor='var(--indigo)';this.style.background='var(--indigo-l)'"
+                onmouseleave="this.style.borderColor='var(--slate-300)';this.style.background='var(--slate-50)'"
+              >
+                <span style="font-size:26px">📁</span>
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:var(--slate-700)" id="surveyImageLabel">Файл таңдау үшін басыңыз</div>
+                  <div style="font-size:12px;color:var(--slate-400);margin-top:2px">JPEG, PNG, WebP · Ең көбі 3 МБ</div>
+                </div>
+                <span id="surveyImageClear" style="margin-left:auto;display:none;font-size:18px;color:var(--rose);" onclick="clearSurveyImage(event)">✕</span>
+              </div>
+              <div id="surveyImagePreview" style="margin-top:10px;display:none;width:100%;height:160px;border-radius:10px;background-size:cover;background-position:center;border:1.5px solid var(--slate-200);"></div>
             </div>
           </div>
         </div>
@@ -630,9 +639,7 @@ async function api(path, opts = {}) {
 // ─── INIT UI ────────────────────────────────────────────
 function initUI() {
   const name = USER?.name || 'Қолданушы';
-  const init = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
   document.getElementById('navName').textContent = name;
-  document.getElementById('navAv').textContent = init;
   document.getElementById('greetName').textContent = name.split(' ')[0];
 
   // Profile form
@@ -641,17 +648,6 @@ function initUI() {
   document.getElementById('profLastName').value  = parts.slice(1).join(' ') || '';
   document.getElementById('profEmail').value = USER?.email || '';
 
-  // Avatar big + nav
-  const ab = document.getElementById('avatarBig');
-  const navAv = document.getElementById('navAv');
-  if (USER?.avatarUrl) {
-    ab.innerHTML = `<img src="${USER.avatarUrl}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:18px">`;
-    navAv.innerHTML = `<img src="${USER.avatarUrl}" alt="avatar">`;
-  } else {
-    ab.textContent = init;
-    ab.style.color = 'var(--indigo)';
-    navAv.textContent = init;
-  }
 }
 
 function logout() {
@@ -756,45 +752,47 @@ async function changePassword() {
   }
 }
 
-async function handleAvatarChange(event) {
+async function handleSurveyImageChange(event) {
   const file = event.target.files[0];
-  if (!file) return;
-
-  // Immediate local preview
+  if (!file) {
+    builder.imageUrl = null;
+    document.getElementById('surveyImagePreview').style.display = 'none';
+    document.getElementById('surveyImageLabel').textContent = 'Файл таңдау үшін басыңыз';
+    document.getElementById('surveyImageClear').style.display = 'none';
+    return;
+  }
+  if (file.size > 3 * 1024 * 1024) {
+    showToast('Көлемі 3МБ-тан аспауы керек', 'e');
+    event.target.value = '';
+    return;
+  }
+  // Файл атын лабелде көрсету
+  document.getElementById('surveyImageLabel').textContent = file.name;
+  document.getElementById('surveyImageClear').style.display = 'inline';
   const reader = new FileReader();
   reader.onload = e => {
-    const ab = document.getElementById('avatarBig');
-    ab.innerHTML = `<img src="${e.target.result}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:18px">`;
+    const base64Str = e.target.result;
+    builder.imageUrl = base64Str;
+    const preview = document.getElementById('surveyImagePreview');
+    preview.style.display = 'block';
+    preview.style.backgroundImage = `url(${base64Str})`;
   };
   reader.readAsDataURL(file);
+}
 
-  // Upload to server
-  const formData = new FormData();
-  formData.append('avatar', file);
-
-  try {
-    showToast('Сурет жүктелуде...', 's');
-    const res = await fetch('/api/auth/avatar', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + TOKEN },
-      body: formData
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Жүктеу қатесі');
-
-    // Update localStorage user with new avatarUrl
-    const newUser = { ...USER, avatarUrl: data.data?.avatarUrl || data.avatarUrl };
-    localStorage.setItem('user', JSON.stringify(newUser));
-    Object.assign(USER, newUser);
-
-    // Update nav avatar chip
-    const navAv = document.getElementById('navAv');
-    navAv.innerHTML = `<img src="${newUser.avatarUrl}" alt="avatar">`;
-
-    showToast('Аватар сәтті жаңартылды! ✅', 'ok');
-  } catch (err) {
-    showToast(err.message, 'e');
-  }
+// Суретті тазалау
+function clearSurveyImage(event) {
+  event.stopPropagation(); // Панелдің onclick іске қосылмасын тоқтату
+  builder.imageUrl = null;
+  const inp = document.getElementById('surveyImage');
+  if (inp) inp.value = '';
+  document.getElementById('surveyImagePreview').style.display = 'none';
+  document.getElementById('surveyImageLabel').textContent = 'Файл таңдау үшін басыңыз';
+  document.getElementById('surveyImageClear').style.display = 'none';
+  // “Сурет жойылды” шегініс көрсету
+  const zone = document.getElementById('surveyImageDropZone');
+  zone.style.borderColor = 'var(--slate-300)';
+  zone.style.background  = 'var(--slate-50)';
 }
 
 function confirmDeleteAccount() {
@@ -984,9 +982,11 @@ function removeQuestion(idx) {
 }
 
 function resetBuilder() {
-  builder = { title: '', description: '', questions: [] };
+  builder = { title: '', description: '', questions: [], imageUrl: null };
   document.getElementById('surveyTitle').value = '';
   document.getElementById('surveyDesc').value  = '';
+  document.getElementById('surveyImage').value = '';
+  document.getElementById('surveyImagePreview').style.display = 'none';
   renderQList();
 }
 
@@ -1006,7 +1006,8 @@ async function publishSurvey() {
         title,
         description: document.getElementById('surveyDesc').value.trim(),
         questions: builder.questions,
-        is_active: true
+        is_active: true,
+        imageUrl: builder.imageUrl
       })
     });
     showToast('Сауалнама жарияланды! 🎉', 'ok');
@@ -1034,7 +1035,8 @@ async function saveDraft() {
         title,
         description: document.getElementById('surveyDesc').value.trim(),
         questions: builder.questions,
-        is_active: false
+        is_active: false,
+        imageUrl: builder.imageUrl
       })
     });
     showToast('Нобайға сақталды 💾', 'ok');
@@ -1095,8 +1097,10 @@ function renderMySurveys(list) {
     const statusClass = isActive ? 'active' : 'draft';
     const statusText  = isActive ? 'Белсенді' : 'Нобай';
     const ago = timeAgo(s.created_at);
+    const coverHTML = s.imageUrl ? `<img src="${s.imageUrl}" style="width:100%;height:150px;object-fit:cover;border-radius:16px 16px 0 0;flex-shrink:0" alt="Cover">` : '';
     return `
       <div class="s-card" id="scard-${s.id}">
+        ${coverHTML}
         <div class="s-card-header">
           <div class="s-card-title">${esc(s.title)}</div>
           <div class="s-card-stats">
@@ -1105,8 +1109,11 @@ function renderMySurveys(list) {
           </div>
         </div>
         <div class="s-card-body">
-          <div class="s-card-desc">${esc(s.description || 'Сипаттама жоқ')}</div>
-          <div class="s-card-meta">
+          <div class="s-card-desc" style="flex:1">${esc(s.description || 'Сипаттама жоқ')}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--slate-100)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:13px;font-weight:600;color:var(--slate-600)">👤 ${esc(USER?.name || 'Қолданушы')}</span>
+            </div>
             <span class="s-status ${statusClass}">${statusText}</span>
           </div>
         </div>
@@ -1375,15 +1382,16 @@ function renderAnalyticsComments(comments) {
   } else {
     html += `<div style="display:flex;flex-direction:column;gap:12px;max-height:400px;overflow-y:auto;padding-right:8px">`;
     html += comments.map(c => {
-      const init = (c.author_name || 'A').slice(0,2).toUpperCase();
-      const color = colorFor(c.author_name || '');
       const ago = timeAgo(c.createdAt);
+      const nameStr = c.author_name || 'Аноним';
+      const init = nameStr.slice(0, 2).toUpperCase();
+      const color = colorFor(nameStr);
       return `
         <div style="display:flex;gap:12px;padding:16px;background:var(--white);border:1.5px solid var(--slate-200);border-radius:12px">
-          <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0;background:${color}">${init}</div>
+          <div style="width:40px;height:40px;border-radius:50%;background:${color};color:white;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0">${init}</div>
           <div style="flex:1">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-              <span style="font-size:15px;font-weight:700;color:var(--slate)">${esc(c.author_name || 'Аноним')}</span>
+              <span style="font-size:15px;font-weight:700;color:var(--slate)">${esc(nameStr)}</span>
               <span style="font-size:13px;color:var(--slate-400)">${ago}</span>
             </div>
             <div style="font-size:14px;color:var(--slate-600);line-height:1.6">${esc(c.text)}</div>
