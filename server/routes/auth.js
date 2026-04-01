@@ -200,9 +200,9 @@ async function deleteAccount(req, res) {
   try {
     const userId = req.user.id;
     await query('BEGIN');
-    await query(`DELETE FROM "Responses" WHERE survey_id IN (SELECT id FROM "Surveys" WHERE user_id = $1)`, [userId]);
-    await query(`DELETE FROM "Comments"  WHERE user_id = $1 OR survey_id IN (SELECT id FROM "Surveys" WHERE user_id = $1)`, [userId]);
-    await query('DELETE FROM "Surveys" WHERE user_id = $1', [userId]);
+    await query(`DELETE FROM "Responses" WHERE "surveyId" IN (SELECT id FROM "Surveys" WHERE "userId" = $1)`, [userId]);
+    await query(`DELETE FROM "Comments"  WHERE "userId" = $1 OR "surveyId" IN (SELECT id FROM "Surveys" WHERE "userId" = $1)`, [userId]);
+    await query('DELETE FROM "Surveys" WHERE "userId" = $1', [userId]);
     await query('DELETE FROM "Users"   WHERE id = $1',      [userId]);
     await query('COMMIT');
     return res.json({ success: true, message: 'Аккаунт жойылды' });

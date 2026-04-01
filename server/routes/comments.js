@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/:surveyId', async (req, res) => {
   try {
     const result = await query(
-      `SELECT c.*, u.name as author_name, u."avatarUrl" as author_avatar
+      `SELECT c.*, u.name as author_name
        FROM "Comments" c
        LEFT JOIN "Users" u ON c."userId" = u.id
        WHERE c."surveyId" = $1
@@ -50,7 +50,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
     // Автор атын қайтару
     const comment = await query(
-      `SELECT c.*, u.name as author_name, u."avatarUrl" as author_avatar
+      `SELECT c.*, u.name as author_name
        FROM "Comments" c
        LEFT JOIN "Users" u ON c."userId" = u.id
        WHERE c.id = $1`,

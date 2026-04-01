@@ -44,6 +44,7 @@ export const authAPI = {
 
 // ─── SURVEYS ──────────────────────────────────────────────
 export const surveysAPI = {
+  // Canonical names
   getAll:   ()         => request('/surveys'),
   getMy:    ()         => request('/surveys/my'),
   getOne:   (id)       => request(`/surveys/${id}`),
@@ -52,6 +53,17 @@ export const surveysAPI = {
   create:   (body)     => request('/surveys',       { method: 'POST',   body: JSON.stringify(body) }),
   update:   (id, body) => request(`/surveys/${id}`, { method: 'PUT',    body: JSON.stringify(body) }),
   delete:   (id)       => request(`/surveys/${id}`, { method: 'DELETE' }),
+
+  // Aliases used in DashboardPage
+  getUserSurveys:   ()         => request('/surveys/my'),
+  getSurveyResults: (id)       => request(`/surveys/${id}/results`),
+  createSurvey:     (body)     => request('/surveys',       { method: 'POST',   body: JSON.stringify(body) }),
+  updateSurvey:     (id, body) => request(`/surveys/${id}`, { method: 'PUT',    body: JSON.stringify(body) }),
+  deleteSurvey:     (id)       => request(`/surveys/${id}`, { method: 'DELETE' }),
+  getComments:      (id)       => request(`/comments/${id}`),
+  // MainPage aliases
+  submitResponse:   (id, answers) => request('/responses', { method: 'POST', body: JSON.stringify({ surveyId: id, answers: Object.entries(answers).map(([questionIndex, answer]) => ({ questionIndex: Number(questionIndex), answer })) }) }),
+  addComment:       (id, body)    => request('/comments', { method: 'POST', body: JSON.stringify({ surveyId: id, ...body }) }),
 };
 
 // ─── RESPONSES ────────────────────────────────────────────

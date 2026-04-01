@@ -1,0 +1,190 @@
+/* ==================================================
+PRODUCTION STYLES.CSS — MERGED (DESIGN PRESERVED)
+Rules:
+
+* NO class renaming
+* NO visual changes
+* ONLY deduplication & dead-style removal
+* React-safe (JSX className aware)
+  ================================================== */
+
+/* =============================
+BASE / RESET (ONCE)
+============================= */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+line-height: 1.6;
+color: var(--slate);
+background: var(--white);
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* =============================
+DESIGN TOKENS (ONCE)
+============================= */
+
+:root {
+--indigo:#4F46E5; --indigo-d:#3730A3; --indigo-l:#EEF2FF; --indigo-xl:#E0E7FF;
+--amber:#F59E0B; --amber-l:#FFFBEB; --amber-d:#92400E;
+--rose:#F43F5E;   --rose-l:#FFF1F2;  --rose-d:#9F1239;
+--green:#10B981;  --green-l:#ECFDF5; --green-d:#047857;
+
+--slate:#0F172A; --slate-700:#334155; --slate-600:#475569;
+--slate-400:#94A3B8; --slate-300:#CBD5E1; --slate-200:#E2E8F0;
+--slate-100:#F1F5F9; --slate-50:#F8FAFC; --white:#fff;
+
+--shadow-sm:0 1px 3px rgba(0,0,0,.08);
+--shadow:0 4px 16px rgba(0,0,0,.08);
+--shadow-lg:0 8px 32px rgba(0,0,0,.12);
+}
+
+/* =============================
+SHARED COMPONENTS (DEDUPED)
+============================= */
+
+.btn {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: 7px;
+padding: 10px 22px;
+border-radius: 10px;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+border: none;
+transition: .18s;
+}
+
+.btn-primary { background: var(--indigo); color: #fff; }
+.btn-primary:hover { background: var(--indigo-d); }
+
+.btn-ghost {
+background: transparent;
+border: 1.5px solid var(--slate-300);
+color: var(--slate-600);
+}
+.btn-ghost:hover { background: var(--slate-100); }
+
+.input {
+width: 100%;
+padding: 12px 14px;
+border-radius: 10px;
+border: 1.5px solid var(--slate-300);
+font-size: 14px;
+}
+.input:focus {
+outline: none;
+border-color: var(--indigo);
+}
+
+.nav {
+height: 68px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 2.5rem;
+border-bottom: 1px solid var(--slate-200);
+}
+
+.toast {
+position: fixed;
+bottom: 24px;
+right: 24px;
+padding: 12px 20px;
+border-radius: 12px;
+background: var(--slate);
+color: #fff;
+opacity: 0;
+transform: translateY(40px);
+transition: .3s;
+z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ==================================================
+PUBLIC PAGE (globals.css — UNCHANGED)
+================================================== */
+
+/* ⬇️ ВАЖНО: ниже стили PublicPage сохранены по логике,
+без визуальных правок. Удалены только неиспользуемые
+дубликаты base-стилей. */
+
+.hero { padding: 6rem 0 5rem; background: linear-gradient(180deg, var(--indigo-xl), #fff); }
+.hero-title { font-size: 56px; font-weight: 800; line-height: 1.05; }
+.hero-subtitle { margin-top: 18px; font-size: 18px; color: var(--slate-600); }
+
+.features { padding: 5rem 0; }
+.features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+.feature-card {
+background: #fff;
+border-radius: 20px;
+padding: 28px;
+box-shadow: var(--shadow);
+}
+
+.demo-sec { padding: 5rem 0; background: var(--slate-50); }
+
+.cta {
+padding: 4rem 0;
+background: linear-gradient(180deg, var(--indigo), var(--indigo-d));
+color: #fff;
+}
+
+/* ==================================================
+AUTH (LOGIN / REGISTER) — DESIGN PRESERVED
+================================================== */
+
+.auth-layout {
+min-height: 100vh;
+display: grid;
+grid-template-columns: 1fr 1fr;
+}
+
+.auth-left { padding: 4rem; }
+.auth-right { background: var(--indigo-l); }
+
+.field-row {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 12px;
+}
+
+.password-meter {
+display: flex;
+gap: 6px;
+margin-top: 6px;
+}
+
+/* ==================================================
+DASHBOARD — DESIGN PRESERVED
+================================================== */
+
+.layout {
+display: grid;
+grid-template-columns: 260px 1fr;
+min-height: 100vh;
+}
+
+.sidebar {
+background: #fff;
+border-right: 1px solid var(--slate-200);
+}
+
+.content { padding: 2rem; }
+
+/* ==================================================
+RESPONSIVE (ORDER PRESERVED)
+================================================== */
+
+@media (max-width: 900px) {
+.auth-layout { grid-template-columns: 1fr; }
+.layout { grid-template-columns: 1fr; }
+.features-grid { grid-template-columns: 1fr; }
+}

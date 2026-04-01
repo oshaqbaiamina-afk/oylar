@@ -68,7 +68,7 @@ router.get('/', async (req, res) => {
 
     // Барлық белсенді сауалнамалар
     const result = await query(
-      `SELECT s.id, s.title, s.description, s."isPublished", s."createdAt", s."imageUrl",
+      `SELECT s.id, s.title, s.description, s."isPublished", s."createdAt", s."imageUrl", s.questions,
               u.name as author_name,
               (SELECT COUNT(*) FROM "Responses" r WHERE r."surveyId" = s.id)::int as response_count
        FROM "Surveys" s
@@ -76,6 +76,13 @@ router.get('/', async (req, res) => {
        WHERE s."isPublished" = true
        ORDER BY s."createdAt" DESC`
     );
+    // Парсим questions из JSON строки
+    result.rows.forEach(row => {
+      if (typeof row.questions === 'string') {
+        try { row.questions = JSON.parse(row.questions); } catch { row.questions = []; }
+      }
+      if (!Array.isArray(row.questions)) row.questions = [];
+    });
     res.json({ success: true, data: result.rows });
   } catch (err) {
     console.error('Get all surveys error:', err);
